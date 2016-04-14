@@ -43,7 +43,7 @@ public class GreetinServer implements Runnable
        ArrayList<String> parsedInput=new ArrayList<>();
        if(dataFromBuffer!=null){
            
-           // System.out.println("From the client:"+dataFromBuffer);
+            System.out.println("From the client:"+dataFromBuffer);
             String[] myData=dataFromBuffer.split(DELIMITS);
             parsedInput.addAll(Arrays.asList(myData));
             return parsedInput;
