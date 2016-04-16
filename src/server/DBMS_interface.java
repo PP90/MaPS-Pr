@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DBMS_interface {
     
@@ -44,6 +46,22 @@ public class DBMS_interface {
          return null;
         }
     }
+    
+    public boolean changePassword(String username, String newPwd){
+    String updatePass="UPDATE account SET `password`=? WHERE `email`=?";
+
+        try {
+             PreparedStatement ps = connection.prepareStatement(updatePass);
+              ps.setString(1, newPwd);
+              ps.setString(2, username);
+              return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBMS_interface.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+   
+    }
+    
      //It works
     public ArrayList<String> getUserList() throws SQLException{
          ArrayList<String> usersList = null;
@@ -65,11 +83,10 @@ public class DBMS_interface {
 
         ResultSet result;    
         try{
-             String query="SELECT username FROM account WHERE (username=? OR email=?) AND password=?";
+             String query="SELECT email FROM account WHERE email=? AND password=?";
              PreparedStatement ps= connection.prepareStatement(query);
              ps.setString(1, username);
-             ps.setString(2, username);
-             ps.setString(3, password);
+             ps.setString(2, password);
              result=ps.executeQuery();
             return result;
         }
@@ -96,34 +113,40 @@ public class DBMS_interface {
     return ( getRowsNumber(rs)==1);
     }
     
-    
-  public boolean insertUser(String username, String email, String password){
-       
+    //TO MODIFY
+  public int insertUser(String username, String password, String name, String surname, String sex){
+       int sexInt=Integer.parseInt(sex);
         try{
-             String insert="insert INTO account (`username`,`email`,`password`)" + " VALUES (?,?,?)";
+             String insert="insert INTO account (`email`,`password`,`name`,`surname`,`sex`)" + " VALUES (?,?,?,?,?)";
              PreparedStatement ps= connection.prepareStatement(insert);
              ps.setString(1, username);
-             ps.setString(2, email);
-             ps.setString(3, password);
-             ps.execute();
-            return true;
+             ps.setString(2, password);
+             ps.setString(3, name);
+             ps.setString(4, surname);
+             ps.setInt(5, sexInt);
+             ps.executeUpdate();
+            return 1;
+        }
+        
+        catch(com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException error){
+            System.out.println("Duplicate");
+            return -2;
         }
         catch(SQLException sqlException){
-            sqlException.printStackTrace();            
-            return false;    
+            return -1;    
         }
+        
    }
   
   //It works
   public boolean deleteUser(String username, String password){
        
         try{
-             String insert="delete FROM account WHERE (username=? OR email=?) AND password=?";
+             String insert="delete FROM account WHERE email=?  AND password=?";
              PreparedStatement ps= connection.prepareStatement(insert);
              ps.setString(1, username);
-             ps.setString(2, username);
-             ps.setString(3, password);
-             ps.execute();
+             ps.setString(2, password);
+            ps.executeUpdate();
             return true;
         }
         catch(SQLException sqlException){
