@@ -5,9 +5,12 @@
  */
 package server;
 
+import EntityClasses.Ad;
 import EntityClasses.FormatMessage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -63,6 +66,31 @@ public class GreetinServer implements Runnable
        else  out.writeUTF("NO");    
 
     }
+   
+   private void manageAd(Ad ad, DBMS_interface dbms_if,  ArrayList<String> dataParsed, DataOutputStream out){
+        FileInputStream fisPhoto;
+        FileInputStream fisDescription;
+
+
+       try {
+           fisPhoto = new FileInputStream ( ad.getPhoto() );
+           fisDescription=new FileInputStream ( ad.getDescription() );
+           if(dbms_if.insertAd(ad.getName(), ad.getDescription(), fisDescription, ad.getPhoto(), fisPhoto,ad.isFindOffer(),
+           ad.getPrice(), ad.getValidFrom(), ad.getValidUntil(), ad.getQuarter(),
+           ad.getLatitude(), ad.getLongitude())){
+           out.writeUTF(FormatMessage.INSERT_AD_OK);
+   }else{
+           out.writeUTF(FormatMessage.INSERT_AD_NO);
+   }
+       } catch (FileNotFoundException ex) {
+           Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
+       } catch (IOException ex) {
+           Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
+       }
+   
+         
+       
+   }
    private void checkLogin(DBMS_interface dbms_if,  ArrayList<String> dataParsed,  DataOutputStream out) throws SQLException, IOException{
         if(dbms_if.checkLogin(dataParsed.get(1), dataParsed.get(2))==true){
                       System.out.println("User "+dataParsed.get(1)+"logged correctly");
@@ -128,7 +156,12 @@ public class GreetinServer implements Runnable
                      case FormatMessage.MODIFY_PWD:
                          modifyPwd(dbms_if, dataParsed,  out);
                          break;
+                         
+                     case FormatMessage.INSERT_AD:
+                        break;
                  }
+                 
+                 //IF THE OBJECT IN THE BUFFER IS A AD OBJECT, THEN PASS THE CONTROL TO manageAd function
              }
          }
          catch(SocketTimeoutException s)

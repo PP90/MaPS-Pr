@@ -2,12 +2,14 @@ package server;
 
 import EntityClasses.Ad;
 import java.io.File;
+import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -64,8 +66,39 @@ public class DBMS_interface {
    
     }
     
-    private boolean insertAd(String title, File description, File photo, int FindOffer ){
-    return false;
+    
+    public boolean insertAd(String title, File description, FileInputStream fisDescription,
+            File photo, FileInputStream fisPhoto, int FindOffer, int price, 
+            Time validFrom, Time validUntil, String quarter,
+            double latitude, double longitude){
+        String insertAdQuery;
+       
+        insertAdQuery = "INSERT INTO ad (`Title`, `Description`, `Photo`, `Price`, `ValidFrom`, `ValidUntil`, `Quarter`, `Latitude`, `Longitude`)"
+                + " VALUES ('?', '?', '?' ,'?', '?', '?', '?', '?', '?');";
+         PreparedStatement ps;
+        try {
+            ps = connection.prepareStatement(insertAdQuery);
+            ps.setString(1, title);
+            ps.setBinaryStream (2, fisDescription, (int) description.length());
+            ps.setBinaryStream (3, fisPhoto, (int) photo.length());
+            ps.setInt(4, FindOffer);
+            ps.setInt(5, price);
+            ps.setTime(7, validFrom);
+            ps.setTime(8, validUntil);
+            ps.setString(9, quarter);
+            ps.setDouble(10, latitude);
+            ps.setDouble(11, longitude);
+            ps.executeUpdate();
+            
+            return true;
+        } catch (SQLException ex) {
+            Logger.getLogger(DBMS_interface.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+             
+
+        
+ 
     }
      //It works
     
