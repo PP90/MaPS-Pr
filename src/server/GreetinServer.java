@@ -5,6 +5,7 @@
  */
 package server;
 
+import EntityClasses.FormatMessage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -28,11 +29,6 @@ public class GreetinServer implements Runnable
    private final ServerSocket SERVER_SOCKET;
    private final int PORT=8080;
    private final int TIMEOUT=10000000;
-   private final String DELIMITS="[,]";
-   private final String LOGIN="LOGIN";
-   private final String INSERT_USER="INSERT_USER";
-   private final String DELETE_USER="DELETE_USER";
-   private final String MODIFY_PWD="UPDATE_PWD";
    public GreetinServer() throws IOException
    {
       SERVER_SOCKET = new ServerSocket(PORT);
@@ -45,15 +41,15 @@ public class GreetinServer implements Runnable
      int insertUserCase=dbms_if.insertUser(dataParsed.get(1), dataParsed.get(2),dataParsed.get(3),dataParsed.get(4),dataParsed.get(5));
             switch (insertUserCase) {
                 case 1:
-                    out.writeUTF(INSERT_USER+",OK");        
+                    out.writeUTF(FormatMessage.INSERT_USER_OK);        
                     break;
                     
                 case -1:
-                    out.writeUTF(INSERT_USER+",NO");
+                    out.writeUTF(FormatMessage.INSERT_USER_NO);
                     break;
                     
                 case -2:
-                    out.writeUTF(INSERT_USER+",DUPLICATE");
+                    out.writeUTF(FormatMessage.INSERT_USER_DUPLICATE);
                     System.out.println("Dupliate");
                     break;
                     
@@ -70,13 +66,14 @@ public class GreetinServer implements Runnable
    private void checkLogin(DBMS_interface dbms_if,  ArrayList<String> dataParsed,  DataOutputStream out) throws SQLException, IOException{
         if(dbms_if.checkLogin(dataParsed.get(1), dataParsed.get(2))==true){
                       System.out.println("User "+dataParsed.get(1)+"logged correctly");
-                    out.writeUTF(LOGIN+",OK");
+                    out.writeUTF(FormatMessage.LOGIN_OK);
                     }else{
                          System.out.println("Result is KO");
-                    out.writeUTF(LOGIN+",NO");
+                    out.writeUTF(FormatMessage.LOGIN_OK);
                     }   
    }
    
+   //TO TEST
    private void modifyPwd(DBMS_interface dbms_if,  ArrayList<String> dataParsed,  DataOutputStream out) throws IOException{
        if(dbms_if.changePassword(dataParsed.get(1),dataParsed.get(2)))  out.writeUTF("OK");
        else  out.writeUTF("NO");
@@ -88,7 +85,7 @@ public class GreetinServer implements Runnable
        if(dataFromBuffer!=null){
            
             System.out.println("From the client:"+dataFromBuffer);
-            String[] myData=dataFromBuffer.split(DELIMITS);
+            String[] myData=dataFromBuffer.split(FormatMessage.DELIMITS);
             parsedInput.addAll(Arrays.asList(myData));
             return parsedInput;
             
@@ -106,33 +103,33 @@ public class GreetinServer implements Runnable
          try
          {
             System.out.println("Waiting for client on port " +   SERVER_SOCKET.getLocalPort() + "...");
-            Socket server = SERVER_SOCKET.accept();
-            System.out.println("Just connected to "+ server.getRemoteSocketAddress());
-            DataInputStream in = new DataInputStream(server.getInputStream());
-         
-            String readFromBuffer= in.readUTF();
-            ArrayList<String> dataParsed=getParsedDataFromBuffer(readFromBuffer);
-            DBMS_interface dbms_if=new DBMS_interface();
-            DataOutputStream out = new DataOutputStream(server.getOutputStream());
-             
-            switch(dataParsed.get(0)){
-                case LOGIN:
-                    checkLogin(dbms_if, dataParsed, out);           
-                break;
-                
-                case INSERT_USER:
-                   insertUserCase(dbms_if, dataParsed, out); 
-                   break;
-                   
-                case DELETE_USER:
-                    deleteUser(dbms_if,   dataParsed,  out);
-                    break;
-                    
-                case MODIFY_PWD:
-                     modifyPwd(dbms_if, dataParsed,  out);
-                    break;    
-                }
-            server.close();
+             try (Socket server = SERVER_SOCKET.accept()) {
+                 System.out.println("Just connected to "+ server.getRemoteSocketAddress());
+                 DataInputStream in = new DataInputStream(server.getInputStream());
+                 
+                 String readFromBuffer= in.readUTF();
+                 ArrayList<String> dataParsed=getParsedDataFromBuffer(readFromBuffer);
+                 DBMS_interface dbms_if=new DBMS_interface();
+                 DataOutputStream out = new DataOutputStream(server.getOutputStream());
+                 
+                 switch(dataParsed.get(0)){
+                     case FormatMessage.LOGIN:
+                         checkLogin(dbms_if, dataParsed, out);
+                         break;
+                         
+                     case FormatMessage.INSERT_USER:
+                         insertUserCase(dbms_if, dataParsed, out);
+                         break;
+                         
+                     case FormatMessage.DELETE_USER:
+                         deleteUser(dbms_if, dataParsed,  out);
+                         break;
+                         
+                     case FormatMessage.MODIFY_PWD:
+                         modifyPwd(dbms_if, dataParsed,  out);
+                         break;
+                 }
+             }
          }
          catch(SocketTimeoutException s)
          {
