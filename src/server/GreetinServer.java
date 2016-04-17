@@ -96,8 +96,6 @@ public class GreetinServer implements Runnable
            return null;
        }
    }
-   
-   
 
    
    @Override

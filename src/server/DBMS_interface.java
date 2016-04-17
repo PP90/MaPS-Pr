@@ -1,5 +1,7 @@
 package server;
 
+import EntityClasses.Ad;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -62,8 +64,13 @@ public class DBMS_interface {
    
     }
     
+    private boolean insertAd(String title, File description, File photo, int FindOffer ){
+    return false;
+    }
      //It works
+    
     public ArrayList<String> getUserList() throws SQLException{
+        Ad ad=new Ad();
          ArrayList<String> usersList = null;
      ResultSet rs=this.queryShowAllUser();
     ResultSetMetaData md = rs.getMetaData();
