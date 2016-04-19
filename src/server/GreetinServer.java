@@ -97,7 +97,7 @@ public class GreetinServer implements Runnable
                     out.writeUTF(FormatMessage.LOGIN_OK);
                     }else{
                          System.out.println("Result is KO");
-                    out.writeUTF(FormatMessage.LOGIN_OK);
+                    out.writeUTF(FormatMessage.LOGIN_NO);
                     }   
    }
    
