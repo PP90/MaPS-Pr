@@ -1,6 +1,6 @@
 package server;
 
-import EntityClasses.Ad;
+import com.example.Ad;
 import java.io.File;
 import java.io.FileInputStream;
 import java.sql.Connection;

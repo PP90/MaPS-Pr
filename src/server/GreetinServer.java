@@ -5,8 +5,9 @@
  */
 package server;
 
-import EntityClasses.Ad;
-import EntityClasses.FormatMessage;
+
+import com.example.Ad;
+import com.example.FormatMessage;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
