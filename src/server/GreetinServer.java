@@ -1,16 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package server;
-
-
-
 
 import EntityClasses.Ad;
 import EntityClasses.FormatMessage;
-import EntityClasses.UserT;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -134,12 +125,11 @@ public class GreetinServer implements Runnable
       {        
          try
          {
-             UserT userT=new UserT();
+          
             System.out.println("Waiting for client on port " +   SERVER_SOCKET.getLocalPort() + "...");
              try (Socket server = SERVER_SOCKET.accept()) {
                  System.out.println("Just connected to "+ server.getRemoteSocketAddress());
                  DataInputStream in = new DataInputStream(server.getInputStream());
-                 
                  String readFromBuffer= in.readUTF();
                  ArrayList<String> dataParsed=getParsedDataFromBuffer(readFromBuffer);
                  DBMS_interface dbms_if=new DBMS_interface();
@@ -167,8 +157,7 @@ public class GreetinServer implements Runnable
                  }
                  
                  //IF THE OBJECT IN THE BUFFER IS A AD OBJECT, THEN PASS THE CONTROL TO manageAd function
-             }
-         }
+             }         }
          catch(SocketTimeoutException s)
          {
             System.out.println("Socket timed out!");
