@@ -6,8 +6,11 @@
 package server;
 
 
-import com.example.Ad;
-import com.example.FormatMessage;
+
+
+import EntityClasses.Ad;
+import EntityClasses.FormatMessage;
+import EntityClasses.UserT;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -131,6 +134,7 @@ public class GreetinServer implements Runnable
       {        
          try
          {
+             UserT userT=new UserT();
             System.out.println("Waiting for client on port " +   SERVER_SOCKET.getLocalPort() + "...");
              try (Socket server = SERVER_SOCKET.accept()) {
                  System.out.println("Just connected to "+ server.getRemoteSocketAddress());

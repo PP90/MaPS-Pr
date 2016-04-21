@@ -1,6 +1,5 @@
 package server;
 
-import com.example.Ad;
 import java.io.File;
 import java.io.FileInputStream;
 import java.sql.Connection;
@@ -9,7 +8,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,7 +67,7 @@ public class DBMS_interface {
     
     public boolean insertAd(String title, File description, FileInputStream fisDescription,
             File photo, FileInputStream fisPhoto, int FindOffer, int price, 
-            Time validFrom, Time validUntil, String quarter,
+            String validFrom, String validUntil, String quarter,
             double latitude, double longitude){
         String insertAdQuery;
        
@@ -83,8 +81,8 @@ public class DBMS_interface {
             ps.setBinaryStream (3, fisPhoto, (int) photo.length());
             ps.setInt(4, FindOffer);
             ps.setInt(5, price);
-            ps.setTime(7, validFrom);
-            ps.setTime(8, validUntil);
+            ps.setString(7, validFrom);
+            ps.setString(8, validUntil);
             ps.setString(9, quarter);
             ps.setDouble(10, latitude);
             ps.setDouble(11, longitude);
@@ -103,7 +101,6 @@ public class DBMS_interface {
      //It works
     
     public ArrayList<String> getUserList() throws SQLException{
-        Ad ad=new Ad();
          ArrayList<String> usersList = null;
      ResultSet rs=this.queryShowAllUser();
     ResultSetMetaData md = rs.getMetaData();
