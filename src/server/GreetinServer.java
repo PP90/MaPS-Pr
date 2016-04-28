@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -25,6 +26,8 @@ import java.util.logging.Logger;
 public class GreetinServer implements Runnable
 {
    private final ServerSocket SERVER_SOCKET;
+
+   
    private final int PORT=8080;
    private final int TIMEOUT=10000000;
    public GreetinServer() throws IOException
@@ -118,6 +121,28 @@ public class GreetinServer implements Runnable
    }
 
    
+   public void sendImage(){
+       try {
+           ServerSocket ss=new ServerSocket(1000);
+           Socket s=ss.accept();
+           
+           FileInputStream fis=new FileInputStream("sample.jpg");
+           int fisSize=fis.available();
+           byte[] buffer=new byte[fisSize];
+           System.out.println("Fis size is "+fisSize);
+           fis.read(buffer);
+           ObjectOutputStream ooo=new ObjectOutputStream(s.getOutputStream());
+           ooo.writeObject(buffer);
+           s.close();
+           
+       } catch (FileNotFoundException ex) {
+           System.out.println("Error in retriving file");
+           Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
+       } catch (IOException ex) {
+           Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
+       }
+   }
+   
    @Override
    public void run()
    {
@@ -126,6 +151,7 @@ public class GreetinServer implements Runnable
          try
          {
           
+             sendImage();//THE SERVER SENDS AN IMAGE
             System.out.println("Waiting for client on port " +   SERVER_SOCKET.getLocalPort() + "...");
              try (Socket server = SERVER_SOCKET.accept()) {
                  System.out.println("Just connected to "+ server.getRemoteSocketAddress());

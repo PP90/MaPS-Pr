@@ -152,7 +152,9 @@ public class DBMS_interface {
     
     //TO MODIFY
   public int insertUser(String username, String password, String name, String surname, String sex){
-       int sexInt=Integer.parseInt(sex);
+       
+      
+      int sexInt=Integer.parseInt(sex);
         try{
              String insert="insert INTO account (`email`,`password`,`name`,`surname`,`sex`)" + " VALUES (?,?,?,?,?)";
              PreparedStatement ps= connection.prepareStatement(insert);
