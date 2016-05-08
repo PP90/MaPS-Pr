@@ -26,9 +26,8 @@ import java.util.logging.Logger;
 public class GreetinServer implements Runnable
 {
    private final ServerSocket SERVER_SOCKET;
-
-   
-   private final int PORT=8085;
+   private final int PORT=8080;
+   private final int PORT_IMAGE=8085;
    private final int TIMEOUT=10000000;
    
    public GreetinServer() throws IOException
@@ -122,25 +121,24 @@ public class GreetinServer implements Runnable
    }
 
    
-   public void sendImage(){
+   public boolean sendImage(ObjectOutputStream outObject){
        try {
-           ServerSocket ss=new ServerSocket(8086);
-           try (Socket s = ss.accept()) {
-               System.out.println("Connection accepted...");
+    
                FileInputStream fis=new FileInputStream("C:\\sample\\sample.jpg");
                int fisSize=fis.available();
                byte[] buffer=new byte[fisSize];
                System.out.println("Fis size is "+fisSize);
                fis.read(buffer);
-               ObjectOutputStream ooo=new ObjectOutputStream(s.getOutputStream());
-               ooo.writeObject(buffer);
-           }
+               outObject.writeObject(buffer);
+               return true;
            
        } catch (FileNotFoundException ex) {
            System.out.println("Error in retriving file");
            Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
+           return false;
        } catch (IOException ex) {
            Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
+           return false;
        }
    }
    
@@ -161,6 +159,7 @@ public class GreetinServer implements Runnable
                  ArrayList<String> dataParsed=getParsedDataFromBuffer(readFromBuffer);
                  DBMS_interface dbms_if=new DBMS_interface();
                  DataOutputStream out = new DataOutputStream(server.getOutputStream());
+                 ObjectOutputStream outObject= null;
                  
                  switch(dataParsed.get(0)){
                      case FormatMessage.LOGIN:
@@ -181,10 +180,16 @@ public class GreetinServer implements Runnable
                          
                      case FormatMessage.INSERT_AD:
                         break;
+                        
+                     case "AD":
+                         System.out.println("The client wants its image");
+                         outObject=new ObjectOutputStream(server.getOutputStream());
+                         sendImage(outObject);
+                         break;
                  }
-                   sendImage();//THE SERVER SENDS AN IMAGE
+                   
                  
-                 //IF THE OBJECT IN THE BUFFER IS A AD OBJECT, THEN PASS THE CONTROL TO manageAd function
+                 
              }         }
          catch(SocketTimeoutException s)
          {
