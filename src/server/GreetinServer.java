@@ -142,6 +142,19 @@ public class GreetinServer implements Runnable
        }
    }
    
+   
+   public void  handleAD(ArrayList<String> receivedFromTheServer, ObjectOutputStream outObject){
+       ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
+       //INSERT AD
+       //DELETE AD
+       //MODIFY AD
+       //SEE ALL AD
+       System.out.println("The client wants its image");
+                        
+                         sendImage(outObject);
+   }
+   
+   
    @Override
    public void run()
    {
@@ -182,9 +195,9 @@ public class GreetinServer implements Runnable
                         break;
                         
                      case "AD":
-                         System.out.println("The client wants its image");
                          outObject=new ObjectOutputStream(server.getOutputStream());
-                         sendImage(outObject);
+                         handleAD(dataParsed,outObject);
+                         outObject.close();
                          break;
                  }
                    
