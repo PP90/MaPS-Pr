@@ -27,7 +27,6 @@ public class GreetinServer implements Runnable
 {
    private final ServerSocket SERVER_SOCKET;
    private final int PORT=8080;
-   private final int PORT_IMAGE=8085;
    private final int TIMEOUT=10000000;
    
    public GreetinServer() throws IOException
@@ -37,9 +36,10 @@ public class GreetinServer implements Runnable
    }
 
    
-   
    private void insertUserCase(DBMS_interface dbms_if,  ArrayList<String> dataParsed,  DataOutputStream out) throws IOException{
-     int insertUserCase=dbms_if.insertUser(dataParsed.get(1), dataParsed.get(2),dataParsed.get(3),dataParsed.get(4),dataParsed.get(5));
+     int insertUserCase=dbms_if.insertUser(dataParsed.get(1), dataParsed.get(2),
+             dataParsed.get(3),dataParsed.get(4),dataParsed.get(5));
+     
             switch (insertUserCase) {
                 case 1:
                     out.writeUTF(FormatMessage.INSERT_USER_OK);        
@@ -51,10 +51,11 @@ public class GreetinServer implements Runnable
                     
                 case -2:
                     out.writeUTF(FormatMessage.INSERT_USER_DUPLICATE);
-                    System.out.println("Dupliate");
+                    System.out.println("Duplicate");
                     break;
                     
                 default:
+                    System.out.println("Message format ERROR in the registration user.");
                     break;
             }
    }
@@ -65,30 +66,6 @@ public class GreetinServer implements Runnable
 
     }
    
-   private void manageAd(Ad ad, DBMS_interface dbms_if,  ArrayList<String> dataParsed, DataOutputStream out){
-        FileInputStream fisPhoto;
-        FileInputStream fisDescription;
-
-
-       try {
-           fisPhoto = new FileInputStream ( ad.getPhoto() );
-           fisDescription=new FileInputStream ( ad.getDescription() );
-           if(dbms_if.insertAd(ad.getName(), ad.getDescription(), fisDescription, ad.getPhoto(), fisPhoto,ad.isFindOffer(),
-           ad.getPrice(), ad.getValidFrom(), ad.getValidUntil(), ad.getQuarter(),
-           ad.getLatitude(), ad.getLongitude())){
-           out.writeUTF(FormatMessage.INSERT_AD_OK);
-   }else{
-           out.writeUTF(FormatMessage.INSERT_AD_NO);
-   }
-       } catch (FileNotFoundException ex) {
-           Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
-       } catch (IOException ex) {
-           Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
-       }
-   
-         
-       
-   }
    private void checkLogin(DBMS_interface dbms_if,  ArrayList<String> dataParsed,  DataOutputStream out) throws SQLException, IOException{
         if(dbms_if.checkLogin(dataParsed.get(1), dataParsed.get(2))==true){
                       System.out.println("User "+dataParsed.get(1)+"logged correctly");
@@ -99,7 +76,7 @@ public class GreetinServer implements Runnable
                     }   
    }
    
-   //TO TEST
+   //TOO: TO BE TESTED
    private void modifyPwd(DBMS_interface dbms_if,  ArrayList<String> dataParsed,  DataOutputStream out) throws IOException{
        if(dbms_if.changePassword(dataParsed.get(1),dataParsed.get(2)))  out.writeUTF("OK");
        else  out.writeUTF("NO");
@@ -110,7 +87,7 @@ public class GreetinServer implements Runnable
        ArrayList<String> parsedInput=new ArrayList<>();
        if(dataFromBuffer!=null){
            
-            System.out.println("From the client:"+dataFromBuffer);
+            System.out.println("From the client: "+dataFromBuffer);
             String[] myData=dataFromBuffer.split(FormatMessage.DELIMITS);
             parsedInput.addAll(Arrays.asList(myData));
             return parsedInput;
@@ -124,10 +101,9 @@ public class GreetinServer implements Runnable
    public boolean sendImage(ObjectOutputStream outObject){
        try {
     
-               FileInputStream fis=new FileInputStream("C:\\sample\\sample.jpg");
+               FileInputStream fis=new FileInputStream("C:\\sample\\sample.jpg");//TODO: CREATE A DIRECTORY IN WHICH THERE ARE SUBDIRECTORY BASED ON USERNAME
                int fisSize=fis.available();
                byte[] buffer=new byte[fisSize];
-               System.out.println("Fis size is "+fisSize);
                fis.read(buffer);
                outObject.writeObject(buffer);
                return true;
@@ -143,15 +119,50 @@ public class GreetinServer implements Runnable
    }
    
    
-   public void  handleAD(ArrayList<String> receivedFromTheServer, ObjectOutputStream outObject){
-       ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
-       //INSERT AD
-       //DELETE AD
-       //MODIFY AD
-       //SEE ALL AD
-       System.out.println("The client wants its image");
-                        
-                         sendImage(outObject);
+   public void  handleAD(ArrayList<String> receivedFromTheServer, Socket server){
+                         ObjectOutputStream outObject=null;
+                         ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
+           
+           //DELETE AD. MANDATOTY
+           //MODIFY AD. optional
+           
+           switch(receivedFromTheServer.get(1)){
+               case "MY_AD"://SEE MY AD case. TODO: IMPLEMENT THE QUERY CASE INTO DB
+                    try {
+         
+           System.out.println("The client wants its ads");
+           outObject = new ObjectOutputStream(server.getOutputStream());
+           sendImage(outObject);
+       } catch (IOException ex) {
+           Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
+       } finally {
+           try {
+               outObject.close();
+           } catch (IOException ex) {
+               Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
+           }
+       }
+                   break;
+                   
+                   
+                   
+               case "NEW"://INSERT AD. TODO: IMPLEMENT THE INSERT CASE INTO DB
+                   
+                   System.out.println("Ad field to be insert"+receivedFromTheServer.toString());
+                   
+                   break;
+                   
+                   
+                   
+               case "DEL":
+                   
+                   break;
+                   
+               default:
+                   System.out.println("Error");
+                   break;
+           }
+      
    }
    
    
@@ -163,22 +174,21 @@ public class GreetinServer implements Runnable
          try
          {
           
-           
             System.out.println("Waiting for client on port " +   SERVER_SOCKET.getLocalPort() + "...");
              try (Socket server = SERVER_SOCKET.accept()) {
-                 System.out.println("Just connected to "+ server.getRemoteSocketAddress());
+                 System.out.println("Just connected to: "+ server.getRemoteSocketAddress());
                  DataInputStream in = new DataInputStream(server.getInputStream());
                  String readFromBuffer= in.readUTF();
                  ArrayList<String> dataParsed=getParsedDataFromBuffer(readFromBuffer);
                  DBMS_interface dbms_if=new DBMS_interface();
                  DataOutputStream out = new DataOutputStream(server.getOutputStream());
-                 ObjectOutputStream outObject= null;
                  
                  switch(dataParsed.get(0)){
                      case FormatMessage.LOGIN:
                          checkLogin(dbms_if, dataParsed, out);
                          break;
                          
+                         //TODO: THESE BELOW THREE CASES MUST BE AGGREGATED IN A SINGLE FUNCTION IN ORDER TO HAVE A BETTER CODE READABILITY
                      case FormatMessage.INSERT_USER:
                          insertUserCase(dbms_if, dataParsed, out);
                          break;
@@ -195,27 +205,27 @@ public class GreetinServer implements Runnable
                         break;
                         
                      case "AD":
-                         outObject=new ObjectOutputStream(server.getOutputStream());
-                         handleAD(dataParsed,outObject);
-                         outObject.close();
+                         handleAD(dataParsed,server);
                          break;
                  }
                    
                  
                  
              }         }
-         catch(SocketTimeoutException s)
-         {
+         catch(SocketTimeoutException s){
             System.out.println("Socket timed out!");
             break;
          }
-         catch(IOException e)
-         {
+         
+         catch(IOException e){
+             System.out.println("Io Exception occured!");
             break;
-            
-         } catch (SQLException ex) { 
-              Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
-          } 
+          }
+         
+         catch (SQLException ex) { 
+             System.out.println("SQL Exception occured!");
+          }
+         
       }
    }
 
