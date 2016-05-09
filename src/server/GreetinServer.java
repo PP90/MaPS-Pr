@@ -119,15 +119,15 @@ public class GreetinServer implements Runnable
    }
    
    
-   public void  handleAD(ArrayList<String> receivedFromTheServer, Socket server){
+   public void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient){
                          ObjectOutputStream outObject=null;
                          ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
            
            //DELETE AD. MANDATOTY
            //MODIFY AD. optional
            
-           switch(receivedFromTheServer.get(1)){
-               case "MY_AD"://SEE MY AD case. TODO: IMPLEMENT THE QUERY CASE INTO DB
+           switch(receivedFromTheClient.get(1)){
+               case FormatMessage.USER_AD://SEE MY AD case. TODO: IMPLEMENT THE QUERY CASE INTO DB
                     try {
          
            System.out.println("The client wants its ads");
@@ -146,10 +146,16 @@ public class GreetinServer implements Runnable
                    
                    
                    
-               case "NEW"://INSERT AD. TODO: IMPLEMENT THE INSERT CASE INTO DB
+               case FormatMessage.INSERT_AD://INSERT AD. TODO: IMPLEMENT THE INSERT CASE INTO DB
                    
-                   System.out.println("Ad field to be insert"+receivedFromTheServer.toString());
+                   System.out.println("Ad field to be insert: "+receivedFromTheClient.toString());
                    
+                   String titleAd=receivedFromTheClient.get(2);
+                   String description=receivedFromTheClient.get(3);
+                   String findOffer=receivedFromTheClient.get(4);
+                   String from=receivedFromTheClient.get(5);
+                   String until=receivedFromTheClient.get(6);
+                  // dbms_if.insertAd(titleAd, description, fisDescription, photo, fisPhoto, TIMEOUT, PORT, from, until, until, PORT, PORT)insertAd()
                    break;
                    
                    
@@ -204,8 +210,8 @@ public class GreetinServer implements Runnable
                      case FormatMessage.INSERT_AD:
                         break;
                         
-                     case "AD":
-                         handleAD(dataParsed,server);
+                     case FormatMessage.AD:
+                         handleAD(server, dbms_if, dataParsed);
                          break;
                  }
                    
