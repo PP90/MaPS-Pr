@@ -1,12 +1,14 @@
 package server;
 
-import EntityClasses.Ad;
 import EntityClasses.FormatMessage;
+import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -119,13 +121,21 @@ public class GreetinServer implements Runnable
    }
    
    
-   public void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient){
+   public byte[] receiveImage(String imgStr) throws Base64DecodingException{
+        byte[] decoded=Base64.decode(imgStr);
+       byte[] b = imgStr.getBytes();
+       System.out.println("The string size is "+imgStr.length());
+       System.out.println("The size is "+b.length);
+       System.out.println("The decoded size is "+decoded.length);
+               return b;
+   }
+   public void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient) throws IOException, Base64DecodingException{
                          ObjectOutputStream outObject=null;
                          ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
            
            //DELETE AD. MANDATOTY
            //MODIFY AD. optional
-           
+             System.out.println("HandleAD");
            switch(receivedFromTheClient.get(1)){
                case FormatMessage.USER_AD://SEE MY AD case. TODO: IMPLEMENT THE QUERY CASE INTO DB
                     try {
@@ -153,8 +163,9 @@ public class GreetinServer implements Runnable
                    String titleAd=receivedFromTheClient.get(2);
                    String description=receivedFromTheClient.get(3);
                    String findOffer=receivedFromTheClient.get(4);
-                   String from=receivedFromTheClient.get(5);
-                   String until=receivedFromTheClient.get(6);
+                   String price=receivedFromTheClient.get(5);
+                   String from=receivedFromTheClient.get(6);
+                   String until=receivedFromTheClient.get(7);
                   // dbms_if.insertAd(titleAd, description, fisDescription, photo, fisPhoto, TIMEOUT, PORT, from, until, until, PORT, PORT)insertAd()
                    break;
                    
@@ -164,6 +175,11 @@ public class GreetinServer implements Runnable
                    
                    break;
                    
+               case "IMG":
+                   System.out.println("IMG");
+                   System.out.println();
+                   receiveImage(receivedFromTheClient.get(2));  
+                   break;
                default:
                    System.out.println("Error");
                    break;
@@ -217,6 +233,8 @@ public class GreetinServer implements Runnable
                    
                  
                  
+             } catch (Base64DecodingException ex) {
+                 Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
              }         }
          catch(SocketTimeoutException s){
             System.out.println("Socket timed out!");
