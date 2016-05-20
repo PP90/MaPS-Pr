@@ -8,11 +8,19 @@ package server;
 import EntityClasses.FormatMessage;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +32,8 @@ import java.util.logging.Logger;
 
 
 public class HandleAd {
-    
+     static InputStream input=null;
+    static File imageToDB=null;
     
      static boolean sendImage(ObjectOutputStream outObject){
        try {
@@ -47,15 +56,38 @@ public class HandleAd {
    }
    
    
-   static byte[] receiveImage(String imgStr) throws Base64DecodingException{
+   static byte[] receiveImage(String imgStr) throws Base64DecodingException, IOException{
         byte[] decoded=Base64.decode(imgStr);
-       byte[] b = imgStr.getBytes();
-       System.out.println("The string size is "+imgStr.length());
-       System.out.println("The size is "+b.length);
+       byte[] byteArrayImage = imgStr.getBytes();
        System.out.println("The decoded size is "+decoded.length);
-               return b;
+       input = new ByteArrayInputStream(byteArrayImage);
+        writeFile(byteArrayImage);
+               return byteArrayImage;
    }
    
+   
+   static boolean writeFile(byte[] imageFromClient) throws IOException{
+
+       /*  try {
+   
+	  File file=new File("C:\\pippo2.jpg");
+          file.setWritable(true);
+          file.createNewFile();
+	    FileOutputStream fos = new FileOutputStream(file); 
+	    fos.write(imageFromClient);
+	    fos.close();
+	       
+	    System.out.println("Done");
+        }catch(Exception e){
+            e.printStackTrace();
+ 
+        }
+       
+       */
+       
+       
+       return false;
+   }
      public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient) throws IOException, Base64DecodingException{
                          ObjectOutputStream outObject=null;
                          ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
@@ -87,13 +119,34 @@ public class HandleAd {
                    
                    System.out.println("Ad field to be insert: "+receivedFromTheClient.toString());
                    
-                   String titleAd=receivedFromTheClient.get(2);
-                   String description=receivedFromTheClient.get(3);
-                   String findOffer=receivedFromTheClient.get(4);
-                   String price=receivedFromTheClient.get(5);
-                   String from=receivedFromTheClient.get(6);
-                   String until=receivedFromTheClient.get(7);
-                  // dbms_if.insertAd(titleAd, description, fisDescription, photo, fisPhoto, TIMEOUT, PORT, from, until, until, PORT, PORT)insertAd()
+                   String titleAd=receivedFromTheClient.get(3);
+                   String description=receivedFromTheClient.get(4);
+                   int findOfferValue;
+                   if(receivedFromTheClient.get(5).equalsIgnoreCase("true")) findOfferValue=1;
+                   else findOfferValue=0;
+                   double priceDouble=0;
+                   try{
+                       priceDouble=Double.valueOf(receivedFromTheClient.get(6));
+                   }catch(Exception e){
+                   e.printStackTrace();
+                   }
+                   double latitude=Double.valueOf(receivedFromTheClient.get(7));
+                   double longitude=Double.valueOf(receivedFromTheClient.get(8));
+                   String from=receivedFromTheClient.get(9);
+                   String until=receivedFromTheClient.get(10);
+                   //TODO: create two file:
+                   //the first one for the description. Name file format: uname_TS_JPEG
+                   //the second one for the image. Name file format: uname_TS_DESC
+                  
+                   
+                  dbms_if.insertAd(titleAd,
+                          null, null,
+                          null,null,
+                          findOfferValue,
+                          priceDouble,
+                          from, until,
+                          null,
+                          latitude,longitude);
                    break;
                    
                    

@@ -66,31 +66,34 @@ public class DBMS_interface {
     
     
     public boolean insertAd(String title, File description, FileInputStream fisDescription,
-            File photo, FileInputStream fisPhoto, int FindOffer, int price, 
+            File photo, FileInputStream fisPhoto, int FindOffer, double price, 
             String validFrom, String validUntil, String quarter,
             double latitude, double longitude){
         String insertAdQuery;
        
-        insertAdQuery = "INSERT INTO ad (`Title`, `Description`, `Photo`, `Price`, `ValidFrom`, `ValidUntil`, `Quarter`, `Latitude`, `Longitude`)"
-                + " VALUES ('?', '?', '?' ,'?', '?', '?', '?', '?', '?');";
+        insertAdQuery = "INSERT INTO ad (`Title`, `Description`, `Photo`, `FindOffer`, `Price`, `ValidFrom`, `ValidUntil`, `Quarter`, `Latitude`, `Longitude`)"
+                + " values (?, ?, ? ,?, ?, ?, ?, ?, ?, ?)";
          PreparedStatement ps;
         try {
             ps = connection.prepareStatement(insertAdQuery);
             ps.setString(1, title);
-            ps.setBinaryStream (2, fisDescription, (int) description.length());
-            ps.setBinaryStream (3, fisPhoto, (int) photo.length());
+            if(description!=null) ps.setBinaryStream (2, fisDescription, (int) description.length());
+            else ps.setBinaryStream (2, null, 0);
+            if(photo!=null) ps.setBinaryStream (3, fisPhoto, (int) photo.length());
+            else ps.setBinaryStream (3, null, 0);
             ps.setInt(4, FindOffer);
-            ps.setInt(5, price);
-            ps.setString(7, validFrom);
-            ps.setString(8, validUntil);
-            ps.setString(9, quarter);
-            ps.setDouble(10, latitude);
-            ps.setDouble(11, longitude);
+            ps.setDouble(5, price);
+            ps.setString(6, validFrom);
+            ps.setString(7, validUntil);
+            ps.setString(8, quarter);
+            ps.setDouble(9, latitude);
+            ps.setDouble(10, longitude);
             ps.executeUpdate();
             
             return true;
         } catch (SQLException ex) {
             Logger.getLogger(DBMS_interface.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
             return false;
         }
              
