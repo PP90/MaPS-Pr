@@ -8,22 +8,22 @@ package server;
 import EntityClasses.FormatMessage;
 import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 
 /**
  *
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 public class HandleAd {
      static InputStream input=null;
     static File imageToDB=null;
-    
+    static final String pathFiles="C:\\ProximityMarket\\";
      static boolean sendImage(ObjectOutputStream outObject){
        try {
     
@@ -55,39 +55,37 @@ public class HandleAd {
        }
    }
    
-   
-   static byte[] receiveImage(String imgStr) throws Base64DecodingException, IOException{
-        byte[] decoded=Base64.decode(imgStr);
-       byte[] byteArrayImage = imgStr.getBytes();
-       System.out.println("The decoded size is "+decoded.length);
-       input = new ByteArrayInputStream(byteArrayImage);
-        writeFile(byteArrayImage);
-               return byteArrayImage;
-   }
-   
-   
-   static boolean writeFile(byte[] imageFromClient) throws IOException{
+   static String getCurrentTs(){
+    SimpleDateFormat s = new SimpleDateFormat("yyyyMMddhhmmss");
+    return s.format(new Date());
 
-       /*  try {
-   
-	  File file=new File("C:\\pippo2.jpg");
-          file.setWritable(true);
-          file.createNewFile();
-	    FileOutputStream fos = new FileOutputStream(file); 
-	    fos.write(imageFromClient);
-	    fos.close();
-	       
-	    System.out.println("Done");
-        }catch(Exception e){
-            e.printStackTrace();
- 
-        }
-       
-       */
-       
-       
-       return false;
    }
+   
+   static void receiveImage(String imgStr) throws Base64DecodingException, IOException{
+       byte[] decodedImage=Base64.decode(imgStr);
+       System.out.println("The decoded size is "+decodedImage.length);
+       String filename=pathFiles+"JPEG_"+"username_"+getCurrentTs()+".jpg";
+       if(writeImageOnFile(decodedImage, filename)) System.out.println("Image written correctly");
+       else System.out.println("Error during writing image");
+   }
+   
+   
+   static boolean writeDescriptionOnFile(){
+   return false;
+   }
+   static boolean writeImageOnFile(byte[] byteToSaveOnFile, String filename){
+   
+   try {
+     ByteArrayInputStream bais = new ByteArrayInputStream(byteToSaveOnFile);
+    imageToDB = new File(filename);
+    BufferedImage bi=ImageIO.read(bais);
+    ImageIO.write(bi, "png", imageToDB);
+} catch (IOException e) {
+    return false;
+}
+   return true;
+   }
+   
      public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient) throws IOException, Base64DecodingException{
                          ObjectOutputStream outObject=null;
                          ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
@@ -126,9 +124,10 @@ public class HandleAd {
                    else findOfferValue=0;
                    double priceDouble=0;
                    try{
-                       priceDouble=Double.valueOf(receivedFromTheClient.get(6));
+                    //   priceDouble=Double.valueOf(receivedFromTheClient.get(6));
                    }catch(Exception e){
-                   e.printStackTrace();
+                       priceDouble=0;
+                  // e.printStackTrace();
                    }
                    double latitude=Double.valueOf(receivedFromTheClient.get(7));
                    double longitude=Double.valueOf(receivedFromTheClient.get(8));
@@ -137,16 +136,29 @@ public class HandleAd {
                    //TODO: create two file:
                    //the first one for the description. Name file format: uname_TS_JPEG
                    //the second one for the image. Name file format: uname_TS_DESC
-                  
-                   
-                  dbms_if.insertAd(titleAd,
-                          null, null,
-                          null,null,
+                   //Create a file with a specific path in which the image or the description will be saved.
+                   //Read the above file and put it into a File input strea,
+                   //put the file input stream into the query
+                   //Perform some tests
+                 FileInputStream fis=new FileInputStream(imageToDB);
+                 fis.read();
+                
+                 
+                  if(dbms_if.insertAd(titleAd,
+                          null,
+                          fis,
                           findOfferValue,
                           priceDouble,
                           from, until,
-                          null,
-                          latitude,longitude);
+                          "Pisa",//Hard coeded. maybe to delete
+                          latitude,longitude)
+                   ){
+               //SEND OK, I'VE INSERT THE AD. TO THE CLIENT
+               
+               }else{
+                  //SEND KO, I'VE NOT INSERT THE AD. TO THE CLIENT
+                  }
+                   fis.close();
                    break;
                    
                    

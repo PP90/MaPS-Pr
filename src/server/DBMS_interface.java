@@ -64,9 +64,9 @@ public class DBMS_interface {
    
     }
     
-    
-    public boolean insertAd(String title, File description, FileInputStream fisDescription,
-            File photo, FileInputStream fisPhoto, int FindOffer, double price, 
+    //It works w\o files
+    public boolean insertAd(String title,FileInputStream fisDescription,
+            FileInputStream fisPhoto, int FindOffer, double price, 
             String validFrom, String validUntil, String quarter,
             double latitude, double longitude){
         String insertAdQuery;
@@ -77,10 +77,11 @@ public class DBMS_interface {
         try {
             ps = connection.prepareStatement(insertAdQuery);
             ps.setString(1, title);
-            if(description!=null) ps.setBinaryStream (2, fisDescription, (int) description.length());
-            else ps.setBinaryStream (2, null, 0);
-            if(photo!=null) ps.setBinaryStream (3, fisPhoto, (int) photo.length());
-            else ps.setBinaryStream (3, null, 0);
+            if(fisDescription!=null)  ps.setBlob(2, fisDescription);
+            else ps.setNull(2, java.sql.Types.BLOB);
+            
+            if(fisPhoto!=null) ps.setBlob(3, fisPhoto);
+            else ps.setNull(3, java.sql.Types.BLOB);
             ps.setInt(4, FindOffer);
             ps.setDouble(5, price);
             ps.setString(6, validFrom);
