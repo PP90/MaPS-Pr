@@ -10,14 +10,15 @@ import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingExcepti
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,24 +33,27 @@ import javax.imageio.ImageIO;
 
 
 public class HandleAd {
-     static InputStream input=null;
+    static InputStream input=null;
     static File imageToDB=null;
+    static File descriptionToDb=null;
     static final String pathFiles="C:\\ProximityMarket\\";
-     static boolean sendImage(ObjectOutputStream outObject){
+    
+    static boolean sendImage(ObjectOutputStream outObject){
        try {
     
-               FileInputStream fis=new FileInputStream("C:\\sample\\sample.jpg");//TODO: CREATE A DIRECTORY IN WHICH THERE ARE SUBDIRECTORY BASED ON USERNAME
-               int fisSize=fis.available();
-               byte[] buffer=new byte[fisSize];
-               fis.read(buffer);
-               outObject.writeObject(buffer);
-               return true;
-           
-       } catch (FileNotFoundException ex) {
-           System.out.println("Error in retriving file");
-           Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
-           return false;
-       } catch (IOException ex) {
+            FileInputStream fis=new FileInputStream("C:\\sample\\sample.jpg");//TODO: CREATE A DIRECTORY IN WHICH THERE ARE SUBDIRECTORY BASED ON USERNAME
+            int fisSize=fis.available();
+            byte[] buffer=new byte[fisSize];
+            fis.read(buffer);
+            outObject.writeObject(buffer);
+            return true;
+        } 
+       catch (FileNotFoundException ex) {
+            System.out.println("Error in retriving file");
+            Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+       }
+       catch (IOException ex) {
            Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
            return false;
        }
@@ -61,18 +65,29 @@ public class HandleAd {
 
    }
    
-   static void receiveImage(String imgStr) throws Base64DecodingException, IOException{
+   static void receiveImage(String imgStr, String username) throws Base64DecodingException, IOException{
        byte[] decodedImage=Base64.decode(imgStr);
        System.out.println("The decoded size is "+decodedImage.length);
-       String filename=pathFiles+"JPEG_"+"username_"+getCurrentTs()+".jpg";
+       String filename=pathFiles+"JPEG_"+username+"_"+getCurrentTs()+".jpg";
        if(writeImageOnFile(decodedImage, filename)) System.out.println("Image written correctly");
        else System.out.println("Error during writing image");
    }
    
    
-   static boolean writeDescriptionOnFile(){
-   return false;
+   static boolean writeDescriptionOnFile(String description, String username) throws FileNotFoundException{
+         try {
+             String filename=pathFiles+"DESC_"+username+"_"+getCurrentTs()+".txt";
+             descriptionToDb=new File(filename);
+             FileOutputStream fos=new FileOutputStream(descriptionToDb);
+             fos.write(description.getBytes());
+             fos.close();
+             return true;
+         } catch (IOException ex) {
+             Logger.getLogger(HandleAd.class.getName()).log(Level.SEVERE, null, ex);
+             return false;
+         }
    }
+   
    static boolean writeImageOnFile(byte[] byteToSaveOnFile, String filename){
    
    try {
@@ -86,10 +101,26 @@ public class HandleAd {
    return true;
    }
    
-     public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient) throws IOException, Base64DecodingException{
-                         ObjectOutputStream outObject=null;
+   
+   
+   public static boolean seeNearAds(String uname, String latString, String longitString, String distString){
+       double lat=Double.valueOf(latString);
+       double longit=Double.valueOf(longitString);
+       int dist=Integer.valueOf(distString);
+       /*
+       HERE:
+       double MinLat=computeMinLat(lat,dist);
+       double MaxLat=computeMaxLat(lat,dist);
+       double MinLon=computeMinLon(lon,dist);
+       double MaxLon=computeMaxLon(lon,dist);
+        
+       
+       */
+   return false;
+   }
+     public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient,  DataOutputStream out) throws IOException, Base64DecodingException{
                          ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
-           
+           ObjectOutputStream outObject=null;
            //DELETE AD. MANDATOTY
            //MODIFY AD. optional
              System.out.println("HandleAD");
@@ -98,7 +129,7 @@ public class HandleAd {
                     try {
          
            System.out.println("The client wants its ads");
-           outObject = new ObjectOutputStream(server.getOutputStream());
+                 outObject = new ObjectOutputStream(server.getOutputStream());
            sendImage(outObject);
        } catch (IOException ex) {
            Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -113,53 +144,41 @@ public class HandleAd {
                    
                    
                    
-               case FormatMessage.INSERT_AD://INSERT AD. TODO: IMPLEMENT THE INSERT CASE INTO DB
-                   
-                   System.out.println("Ad field to be insert: "+receivedFromTheClient.toString());
-                   
+               case FormatMessage.INSERT_AD:
                    String titleAd=receivedFromTheClient.get(3);
-                   String description=receivedFromTheClient.get(4);
+                   writeDescriptionOnFile(receivedFromTheClient.get(4),receivedFromTheClient.get(2));
                    int findOfferValue;
                    if(receivedFromTheClient.get(5).equalsIgnoreCase("true")) findOfferValue=1;
                    else findOfferValue=0;
-                   double priceDouble=0;
+                   
+                   double priceDouble;
                    try{
-                    //   priceDouble=Double.valueOf(receivedFromTheClient.get(6));
-                   }catch(Exception e){
+                       priceDouble=Double.valueOf(receivedFromTheClient.get(6));
+                   }catch(Exception e){//TODO: IF THE STRING IS EMPTY, THEN PRICE IS EQUAL TOZERO
                        priceDouble=0;
-                  // e.printStackTrace();
                    }
                    double latitude=Double.valueOf(receivedFromTheClient.get(7));
                    double longitude=Double.valueOf(receivedFromTheClient.get(8));
                    String from=receivedFromTheClient.get(9);
                    String until=receivedFromTheClient.get(10);
-                   //TODO: create two file:
-                   //the first one for the description. Name file format: uname_TS_JPEG
-                   //the second one for the image. Name file format: uname_TS_DESC
-                   //Create a file with a specific path in which the image or the description will be saved.
-                   //Read the above file and put it into a File input strea,
-                   //put the file input stream into the query
-                   //Perform some tests
-                 FileInputStream fis=new FileInputStream(imageToDB);
-                 fis.read();
                 
+                    FileInputStream fisImg=new FileInputStream(imageToDB);
+                    FileInputStream fisDesc=new FileInputStream(descriptionToDb);
+                    fisImg.read();
+                    fisImg.read();
                  
                   if(dbms_if.insertAd(titleAd,
-                          null,
-                          fis,
+                          fisDesc, fisImg,
                           findOfferValue,
                           priceDouble,
                           from, until,
                           "Pisa",//Hard coeded. maybe to delete
-                          latitude,longitude)
-                   ){
-               //SEND OK, I'VE INSERT THE AD. TO THE CLIENT
-               
-               }else{
-                  //SEND KO, I'VE NOT INSERT THE AD. TO THE CLIENT
-                  }
-                   fis.close();
-                   break;
+                          latitude,longitude))  out.writeUTF(FormatMessage.INSERT_AD_OK);  
+                    else out.writeUTF(FormatMessage.INSERT_USER_NO);
+                  
+                    fisImg.close();
+                    fisDesc.close();
+                    break;
                    
                    
                    
@@ -169,9 +188,15 @@ public class HandleAd {
                    
                case "IMG":
                    System.out.println("IMG");
-                   System.out.println();
-                   receiveImage(receivedFromTheClient.get(2));  
+                   receiveImage(receivedFromTheClient.get(3),receivedFromTheClient.get(2));  
                    break;
+                   
+               case "SEE_NEAR":
+                   System.out.println("SEE_NEAR");
+                   
+                   break;
+                   
+                   
                default:
                    System.out.println("Error");
                    break;

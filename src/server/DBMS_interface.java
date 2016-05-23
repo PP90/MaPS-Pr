@@ -64,7 +64,7 @@ public class DBMS_interface {
    
     }
     
-    //It works w\o files
+    //It works w\o description files
     public boolean insertAd(String title,FileInputStream fisDescription,
             FileInputStream fisPhoto, int FindOffer, double price, 
             String validFrom, String validUntil, String quarter,
