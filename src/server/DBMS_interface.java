@@ -49,6 +49,21 @@ public class DBMS_interface {
         }
     }
     
+    
+    private ResultSet queryShowAllAds(){
+        
+        try{
+            String query="SELECT * FROM Ad";
+            PreparedStatement ps= connection.prepareStatement(query);
+            return ps.executeQuery();
+        }
+   
+        catch(SQLException sqlException){
+            sqlException.printStackTrace();
+         return null;
+        }
+    }
+    
     public boolean changePassword(String username, String newPwd){
     String updatePass="UPDATE account SET `password`=? WHERE `email`=?";
 
@@ -64,31 +79,34 @@ public class DBMS_interface {
    
     }
     
-    //It works w\o description files
-    public boolean insertAd(String title,FileInputStream fisDescription,
-            FileInputStream fisPhoto, int FindOffer, double price, 
-            String validFrom, String validUntil, String quarter,
+    
+    public boolean getAllAds(){
+    
+   return false;     
+    }
+    //It works
+    public boolean insertAd(String typology,FileInputStream fisDescription,
+            FileInputStream fisPhoto, double price, 
+            String validFrom, String validUntil,
             double latitude, double longitude){
         String insertAdQuery;
        
-        insertAdQuery = "INSERT INTO ad (`Title`, `Description`, `Photo`, `FindOffer`, `Price`, `ValidFrom`, `ValidUntil`, `Quarter`, `Latitude`, `Longitude`)"
-                + " values (?, ?, ? ,?, ?, ?, ?, ?, ?, ?)";
+        insertAdQuery = "INSERT INTO ad (`Typology`, `Description`, `Photo`,`Price`, `ValidFrom`, `ValidUntil`, `Latitude`, `Longitude`)"
+                + " values (?, ?, ? ,?, ?, ?, ?, ?)";
          PreparedStatement ps;
         try {
             ps = connection.prepareStatement(insertAdQuery);
-            ps.setString(1, title);
+            ps.setString(1, typology);
             if(fisDescription!=null)  ps.setBlob(2, fisDescription);
             else ps.setNull(2, java.sql.Types.BLOB);
-            
+         
             if(fisPhoto!=null) ps.setBlob(3, fisPhoto);
             else ps.setNull(3, java.sql.Types.BLOB);
-            ps.setInt(4, FindOffer);
-            ps.setDouble(5, price);
-            ps.setString(6, validFrom);
-            ps.setString(7, validUntil);
-            ps.setString(8, quarter);
-            ps.setDouble(9, latitude);
-            ps.setDouble(10, longitude);
+            ps.setDouble(4, price);
+            ps.setString(5, validFrom);
+            ps.setString(6, validUntil);
+            ps.setDouble(7, latitude);
+            ps.setDouble(8, longitude);
             ps.executeUpdate();
             
             return true;
@@ -119,6 +137,24 @@ public class DBMS_interface {
         
         return usersList;
     }
+    
+    public ArrayList<String> getAdsList() throws SQLException{
+         ArrayList<String> adList = null;
+     ResultSet rs=this.queryShowAllAds();
+    ResultSetMetaData md = rs.getMetaData();
+    int columns = md.getColumnCount();
+    adList=new ArrayList<>();
+
+    while (rs.next()) {
+        for (int i = 1; i <= columns; ++i) {
+//            adList.add((String) rs.getObject(i));//HERE. BUG TO FIX
+            }
+    }
+        
+        return adList;
+    }
+    
+    
  //It works
     public ResultSet queryLogin(String username, String password){
 

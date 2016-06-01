@@ -53,6 +53,7 @@ public class GreetinServer implements Runnable
               String readFromBuffer= in.readUTF();
               ArrayList<String> dataParsed=getParsedDataFromBuffer(readFromBuffer);
               DBMS_interface dbms_if=new DBMS_interface();
+            
               DataOutputStream out = new DataOutputStream(server.getOutputStream());
               
               switch(dataParsed.get(0)){
@@ -60,8 +61,7 @@ public class GreetinServer implements Runnable
                       HandleUser.checkLogin(dbms_if, dataParsed, out);
                       break;
                       
-                      //TODO: THESE BELOW THREE CASES MUST BE AGGREGATED IN A SINGLE FUNCTION IN ORDER TO HAVE A BETTER CODE READABILITY
-                  case FormatMessage.INSERT_USER:
+                 case FormatMessage.INSERT_USER:
                       HandleUser.insertUserCase(dbms_if, dataParsed, out);
                       break;
                       

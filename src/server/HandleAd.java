@@ -19,13 +19,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-
 /**
  *
  * @author p3
@@ -37,6 +37,7 @@ public class HandleAd {
     static File imageToDB=null;
     static File descriptionToDb=null;
     static final String pathFiles="C:\\ProximityMarket\\";
+    static final int EARTH_RADIUS=6384;//The radius of the earth in km
     
     static boolean sendImage(ObjectOutputStream outObject){
        try {
@@ -59,6 +60,7 @@ public class HandleAd {
        }
    }
    
+    
    static String getCurrentTs(){
     SimpleDateFormat s = new SimpleDateFormat("yyyyMMddhhmmss");
     return s.format(new Date());
@@ -103,22 +105,46 @@ public class HandleAd {
    
    
    
-   public static boolean seeNearAds(String uname, String latString, String longitString, String distString){
+   public static boolean seeNearAds(String uname,
+           String typology, String latString, String longitString,
+           String distString, DBMS_interface dbIf) throws SQLException{
        double lat=Double.valueOf(latString);
-       double longit=Double.valueOf(longitString);
+       double lon=Double.valueOf(longitString);
        int dist=Integer.valueOf(distString);
-       /*
-       HERE:
-       double MinLat=computeMinLat(lat,dist);
-       double MaxLat=computeMaxLat(lat,dist);
-       double MinLon=computeMinLon(lon,dist);
-       double MaxLon=computeMaxLon(lon,dist);
-        
-       
-       */
-   return false;
-   }
-     public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient,  DataOutputStream out) throws IOException, Base64DecodingException{
+       System.out.println(dbIf.getAdsList().toString());
+      GPSCoordinates gpsCoordinates=new GPSCoordinates(lat, lon);
+      double distKm=dist/1000;
+      
+      gpsCoordinates.setDistance(distKm);
+        gpsCoordinates.getLatMin();
+        gpsCoordinates.getLatMax();
+         gpsCoordinates.getLonMax();
+         gpsCoordinates.getLonMax();
+         //Here. create the spatial query
+    
+       return false;
+       }
+     
+    static double computeMinLat(double lat, int distance){
+    
+        return 0;
+    }
+    
+    static double computeMaxLat(double lat, int distance){
+    
+        return 0;
+    }
+    
+    static double computeMinLon(double lon, int distance){
+    
+        return 0;
+    }
+    
+    static double computeMaxLon(double lon, int distance){
+    
+        return 0;
+    }
+     public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient,  DataOutputStream out) throws IOException, Base64DecodingException, SQLException{
                          ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
            ObjectOutputStream outObject=null;
            //DELETE AD. MANDATOTY
@@ -141,38 +167,31 @@ public class HandleAd {
            }
        }
                    break;
-                   
-                   
-                   
+                        
                case FormatMessage.INSERT_AD:
-                   String titleAd=receivedFromTheClient.get(3);
+                   String typology=receivedFromTheClient.get(3);
                    writeDescriptionOnFile(receivedFromTheClient.get(4),receivedFromTheClient.get(2));
-                   int findOfferValue;
-                   if(receivedFromTheClient.get(5).equalsIgnoreCase("true")) findOfferValue=1;
-                   else findOfferValue=0;
-                   
+
                    double priceDouble;
                    try{
-                       priceDouble=Double.valueOf(receivedFromTheClient.get(6));
+                       priceDouble=Double.valueOf(receivedFromTheClient.get(5));
                    }catch(Exception e){//TODO: IF THE STRING IS EMPTY, THEN PRICE IS EQUAL TOZERO
                        priceDouble=0;
                    }
-                   double latitude=Double.valueOf(receivedFromTheClient.get(7));
-                   double longitude=Double.valueOf(receivedFromTheClient.get(8));
-                   String from=receivedFromTheClient.get(9);
-                   String until=receivedFromTheClient.get(10);
+                   double latitude=Double.valueOf(receivedFromTheClient.get(6));
+                   double longitude=Double.valueOf(receivedFromTheClient.get(7));
+                   String from=receivedFromTheClient.get(8);
+                   String until=receivedFromTheClient.get(9);
                 
                     FileInputStream fisImg=new FileInputStream(imageToDB);
                     FileInputStream fisDesc=new FileInputStream(descriptionToDb);
                     fisImg.read();
                     fisImg.read();
                  
-                  if(dbms_if.insertAd(titleAd,
+                  if(dbms_if.insertAd(typology,
                           fisDesc, fisImg,
-                          findOfferValue,
                           priceDouble,
                           from, until,
-                          "Pisa",//Hard coeded. maybe to delete
                           latitude,longitude))  out.writeUTF(FormatMessage.INSERT_AD_OK);  
                     else out.writeUTF(FormatMessage.INSERT_USER_NO);
                   
@@ -193,12 +212,13 @@ public class HandleAd {
                    
                case "SEE_NEAR":
                    System.out.println("SEE_NEAR");
-                   
+                   seeNearAds(receivedFromTheClient.get(2),receivedFromTheClient.get(3),
+                           receivedFromTheClient.get(4), receivedFromTheClient.get(5), receivedFromTheClient.get(6),dbms_if);
                    break;
                    
                    
                default:
-                   System.out.println("Error");
+                   System.out.println("Error, format message not expected");
                    break;
            }
       
