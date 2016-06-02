@@ -111,17 +111,16 @@ public class HandleAd {
        double lat=Double.valueOf(latString);
        double lon=Double.valueOf(longitString);
        int dist=Integer.valueOf(distString);
-       System.out.println(dbIf.getAdsList().toString());
       GPSCoordinates gpsCoordinates=new GPSCoordinates(lat, lon);
       double distKm=dist/1000;
       
       gpsCoordinates.setDistance(distKm);
-        gpsCoordinates.getLatMin();
-        gpsCoordinates.getLatMax();
-         gpsCoordinates.getLonMax();
-         gpsCoordinates.getLonMax();
-         //Here. create the spatial query
-    
+      double minLat=gpsCoordinates.getLatMin();
+      double maxLat=gpsCoordinates.getLatMax();
+      double minLon=gpsCoordinates.getLonMin();
+      double maxLon=gpsCoordinates.getLonMax();
+       System.out.println("MinLat MaxLat "+minLat+" - "+maxLat+" MinLon MaxLon "+minLon+" "+maxLon);
+      dbIf.seeNearAdsQuery(typology,minLat, maxLat, minLon, maxLon);    
        return false;
        }
      

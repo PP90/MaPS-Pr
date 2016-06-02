@@ -1,5 +1,6 @@
 package server;
 
+import com.sun.org.apache.xml.internal.security.utils.Base64;
 import java.io.File;
 import java.io.FileInputStream;
 import java.sql.Connection;
@@ -8,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,6 +64,25 @@ public class DBMS_interface {
             sqlException.printStackTrace();
          return null;
         }
+    }
+    
+    public ArrayList<String> seeNearAdsQuery(String typology, double minLat, double maxLat, double minLon, double maxLon){
+        String query="SELECT * FROM Ad WHERE Typology=? AND Latitude BETWEEN ? AND ? AND Longitude BETWEEN ? AND ?";
+        try {
+            PreparedStatement ps= connection.prepareStatement(query);
+            ps.setString(1, typology);
+            ps.setDouble(2, minLat);
+            ps.setDouble(3, maxLat);
+            ps.setDouble(4, minLon);
+            ps.setDouble(5, maxLon);
+            ResultSet rs=ps.executeQuery();
+           
+            return this.resultSetToArrayListConverter(rs);
+        } catch (SQLException ex) {
+          ex.printStackTrace();
+           return null;
+        }
+               
     }
     
     public boolean changePassword(String username, String newPwd){
@@ -123,7 +144,7 @@ public class DBMS_interface {
      //It works
     
     public ArrayList<String> getUserList() throws SQLException{
-         ArrayList<String> usersList = null;
+         ArrayList<String> usersList;
      ResultSet rs=this.queryShowAllUser();
     ResultSetMetaData md = rs.getMetaData();
     int columns = md.getColumnCount();
@@ -136,6 +157,36 @@ public class DBMS_interface {
     }
         
         return usersList;
+    }
+    
+    private ArrayList<String> resultSetToArrayListConverter(ResultSet rs){
+         ArrayList<String> arrayList = null;
+        try {
+            ResultSetMetaData md = rs.getMetaData();
+              int columns = md.getColumnCount();
+               System.out.println("Number of columns: "+columns);
+              arrayList=new ArrayList<>();
+                while (rs.next()) {
+                   int id=(int) rs.getObject(1);
+                   String typology= (String) rs.getObject(2);
+                   String description= (String)rs.getObject(3);
+                   byte[] photo= (byte[]) rs.getObject(4);
+                   double price= (double) rs.getObject(5);
+                   Timestamp from= (Timestamp) rs.getObject(6);
+                   Timestamp until = (Timestamp)rs.getObject(7);
+                   double lat= (double) rs.getObject(8);
+                   double lon= (double) rs.getObject(9);
+         arrayList.add(String.valueOf(id)+","+typology+","+description+","+
+                Base64.encode(photo)+","+String.valueOf(price)+","+
+                 from.toString()+","+until.toString()+","+
+                 String.valueOf(lat)+","+String.valueOf(lon)+";") ; 
+    }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBMS_interface.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println(arrayList.toString());
+        return arrayList;
+
     }
     
     public ArrayList<String> getAdsList() throws SQLException{
