@@ -70,14 +70,10 @@ public class GPSCoordinates {
     return maxLat;
     }
     
-    public void prova(double distanceKm){
-        setRsmall(distanceKm);
-        setDeltaLon();
-        setDeltaLat();
-        System.out.println("MinLon is:"+ getLonMin());
+    public void toStringInfo(){
+    System.out.println("MinLon is:"+ getLonMin());
         System.out.println("MaxLon is:"+ getLonMax());
         System.out.println("MinLat is:"+ getLatMin());
         System.out.println("MaxLat is:"+ getLatMax());
     }
-    
 }

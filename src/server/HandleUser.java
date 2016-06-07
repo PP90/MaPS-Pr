@@ -18,15 +18,6 @@ import java.util.ArrayList;
  */
 public class HandleUser {
     
-     public static void  handleUser(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient){
-              switch(receivedFromTheClient.get(1)){
-            
-                //TO BE FILLED.  
-              }      
-     }
-     
-     
-     
      static void insertUserCase(DBMS_interface dbms_if,  ArrayList<String> dataParsed,  DataOutputStream out) throws IOException{
      int insertUserCase=dbms_if.insertUser(dataParsed.get(1), dataParsed.get(2),
              dataParsed.get(3),dataParsed.get(4),dataParsed.get(5));

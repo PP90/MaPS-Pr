@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package server;
 
 import EntityClasses.FormatMessage;
@@ -36,13 +31,15 @@ public class HandleAd {
     static InputStream input=null;
     static File imageToDB=null;
     static File descriptionToDb=null;
-    static final String pathFiles="C:\\ProximityMarket\\";
-    static final int EARTH_RADIUS=6384;//The radius of the earth in km
+    static final String PATH_FILE="C:\\ProximityMarket\\";
+    static final String DATE_FORMAT="yyyymmdd";
     
+    //THIS FUNCTION MAY BE IS NOT USEFUL BECAUSE THE IMAGE IS SENT IN BASE 64 FORMAT
     static boolean sendImage(ObjectOutputStream outObject){
        try {
-    
-            FileInputStream fis=new FileInputStream("C:\\sample\\sample.jpg");//TODO: CREATE A DIRECTORY IN WHICH THERE ARE SUBDIRECTORY BASED ON USERNAME
+            
+            FileInputStream fis=new FileInputStream("C:\\sample\\sample.jpg");
+           
             int fisSize=fis.available();
             byte[] buffer=new byte[fisSize];
             fis.read(buffer);
@@ -62,23 +59,23 @@ public class HandleAd {
    
     
    static String getCurrentTs(){
-    SimpleDateFormat s = new SimpleDateFormat("yyyyMMddhhmmss");
+    SimpleDateFormat s = new SimpleDateFormat(DATE_FORMAT);
     return s.format(new Date());
-
    }
+   
    
    static void receiveImage(String imgStr, String username) throws Base64DecodingException, IOException{
        byte[] decodedImage=Base64.decode(imgStr);
        System.out.println("The decoded size is "+decodedImage.length);
-       String filename=pathFiles+"JPEG_"+username+"_"+getCurrentTs()+".jpg";
+       String filename=PATH_FILE+"JPEG_"+username+"_"+getCurrentTs()+".jpg";
        if(writeImageOnFile(decodedImage, filename)) System.out.println("Image written correctly");
        else System.out.println("Error during writing image");
    }
    
-   
+   //may is not useful because the database can contains a filed with 400 chars
    static boolean writeDescriptionOnFile(String description, String username) throws FileNotFoundException{
          try {
-             String filename=pathFiles+"DESC_"+username+"_"+getCurrentTs()+".txt";
+             String filename=PATH_FILE+"DESC_"+username+"_"+getCurrentTs()+".txt";
              descriptionToDb=new File(filename);
              FileOutputStream fos=new FileOutputStream(descriptionToDb);
              fos.write(description.getBytes());
@@ -105,44 +102,28 @@ public class HandleAd {
    
    
    
-   public static boolean seeNearAds(String uname,
+   public static void seeNearAds(String uname,
            String typology, String latString, String longitString,
            String distString, DBMS_interface dbIf) throws SQLException{
        double lat=Double.valueOf(latString);
        double lon=Double.valueOf(longitString);
        int dist=Integer.valueOf(distString);
+        double distKm=dist/1000;
+        
       GPSCoordinates gpsCoordinates=new GPSCoordinates(lat, lon);
-      double distKm=dist/1000;
-      
       gpsCoordinates.setDistance(distKm);
       double minLat=gpsCoordinates.getLatMin();
       double maxLat=gpsCoordinates.getLatMax();
       double minLon=gpsCoordinates.getLonMin();
       double maxLon=gpsCoordinates.getLonMax();
+      
        System.out.println("MinLat MaxLat "+minLat+" - "+maxLat+" MinLon MaxLon "+minLon+" "+maxLon);
-      dbIf.seeNearAdsQuery(typology,minLat, maxLat, minLon, maxLon);    
-       return false;
+     
+       dbIf.seeNearAdsQuery(typology,minLat, maxLat, minLon, maxLon); 
+       //send the result to the clients
        }
      
-    static double computeMinLat(double lat, int distance){
-    
-        return 0;
-    }
-    
-    static double computeMaxLat(double lat, int distance){
-    
-        return 0;
-    }
-    
-    static double computeMinLon(double lon, int distance){
-    
-        return 0;
-    }
-    
-    static double computeMaxLon(double lon, int distance){
-    
-        return 0;
-    }
+   
      public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient,  DataOutputStream out) throws IOException, Base64DecodingException, SQLException{
                          ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
            ObjectOutputStream outObject=null;
@@ -185,11 +166,8 @@ public class HandleAd {
                     FileInputStream fisImg=new FileInputStream(imageToDB);
                     FileInputStream fisDesc=new FileInputStream(descriptionToDb);
                     fisImg.read();
-                    fisImg.read();
-                 
-                  if(dbms_if.insertAd(typology,
-                          fisDesc, fisImg,
-                          priceDouble,
+               
+                  if(dbms_if.insertAd(typology, fisDesc, fisImg,  priceDouble,
                           from, until,
                           latitude,longitude))  out.writeUTF(FormatMessage.INSERT_AD_OK);  
                     else out.writeUTF(FormatMessage.INSERT_USER_NO);

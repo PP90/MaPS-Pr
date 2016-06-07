@@ -21,8 +21,6 @@ public class Server {
         Thread t=new Thread((Runnable) new GreetinServer());
            t.start();
  }
-
-
     }
 }
     

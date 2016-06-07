@@ -1,7 +1,6 @@
 package server;
 
-import com.sun.org.apache.xml.internal.security.utils.Base64;
-import java.io.File;
+import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,8 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DBMS_interface {
-    
-
     static  final String DRIVER = "com.mysql.jdbc.Driver";             
     static  final String DATABASE_URL = "jdbc:mysql://localhost/proximitymarketdb";   
     private final String USERNAME="admin";
@@ -38,28 +35,11 @@ public class DBMS_interface {
    
     //It works
     private ResultSet queryShowAllUser(){
-        
         try{
             String query="SELECT username FROM account";
             PreparedStatement ps= connection.prepareStatement(query);
             return ps.executeQuery();
         }
-   
-        catch(SQLException sqlException){
-            sqlException.printStackTrace();
-         return null;
-        }
-    }
-    
-    
-    private ResultSet queryShowAllAds(){
-        
-        try{
-            String query="SELECT * FROM Ad";
-            PreparedStatement ps= connection.prepareStatement(query);
-            return ps.executeQuery();
-        }
-   
         catch(SQLException sqlException){
             sqlException.printStackTrace();
          return null;
@@ -76,8 +56,8 @@ public class DBMS_interface {
             ps.setDouble(4, minLon);
             ps.setDouble(5, maxLon);
             ResultSet rs=ps.executeQuery();
-           
-            return this.resultSetToArrayListConverter(rs);
+            return this.getNearAdsArrayList(rs);
+            
         } catch (SQLException ex) {
           ex.printStackTrace();
            return null;
@@ -100,11 +80,6 @@ public class DBMS_interface {
    
     }
     
-    
-    public boolean getAllAds(){
-    
-   return false;     
-    }
     //It works
     public boolean insertAd(String typology,FileInputStream fisDescription,
             FileInputStream fisPhoto, double price, 
@@ -159,14 +134,14 @@ public class DBMS_interface {
         return usersList;
     }
     
-    private ArrayList<String> resultSetToArrayListConverter(ResultSet rs){
+    private ArrayList<String> getNearAdsArrayList(ResultSet rs){
          ArrayList<String> arrayList = null;
         try {
             ResultSetMetaData md = rs.getMetaData();
-              int columns = md.getColumnCount();
-               System.out.println("Number of columns: "+columns);
               arrayList=new ArrayList<>();
+              int coutner=0;
                 while (rs.next()) {
+                    coutner++;
                    int id=(int) rs.getObject(1);
                    String typology= (String) rs.getObject(2);
                    String description= (String)rs.getObject(3);
@@ -180,6 +155,8 @@ public class DBMS_interface {
                 Base64.encode(photo)+","+String.valueOf(price)+","+
                  from.toString()+","+until.toString()+","+
                  String.valueOf(lat)+","+String.valueOf(lon)+";") ; 
+         System.out.println("There are "+coutner+" elements");
+         
     }
         } catch (SQLException ex) {
             Logger.getLogger(DBMS_interface.class.getName()).log(Level.SEVERE, null, ex);
@@ -188,26 +165,9 @@ public class DBMS_interface {
         return arrayList;
 
     }
-    
-    public ArrayList<String> getAdsList() throws SQLException{
-         ArrayList<String> adList = null;
-     ResultSet rs=this.queryShowAllAds();
-    ResultSetMetaData md = rs.getMetaData();
-    int columns = md.getColumnCount();
-    adList=new ArrayList<>();
 
-    while (rs.next()) {
-        for (int i = 1; i <= columns; ++i) {
-//            adList.add((String) rs.getObject(i));//HERE. BUG TO FIX
-            }
-    }
-        
-        return adList;
-    }
     
-    
- //It works
-    public ResultSet queryLogin(String username, String password){
+    private ResultSet queryLogin(String username, String password){
 
         ResultSet result;    
         try{
@@ -217,10 +177,7 @@ public class DBMS_interface {
              ps.setString(2, password);
              result=ps.executeQuery();
             return result;
-        }
-        
-        
-        
+        }  
         catch(SQLException sqlException){
            sqlException.printStackTrace();
             return null;
@@ -241,15 +198,15 @@ public class DBMS_interface {
     return ( getRowsNumber(rs)==1);
     }
     
-    //TO MODIFY
-  public int insertUser(String username, String password, String name, String surname, String sex){
+    //test the functionality
+  public int insertUser(String email, String password, String name, String surname, String sex){
        
       
       int sexInt=Integer.parseInt(sex);
         try{
              String insert="insert INTO account (`email`,`password`,`name`,`surname`,`sex`)" + " VALUES (?,?,?,?,?)";
              PreparedStatement ps= connection.prepareStatement(insert);
-             ps.setString(1, username);
+             ps.setString(1, email);
              ps.setString(2, password);
              ps.setString(3, name);
              ps.setString(4, surname);

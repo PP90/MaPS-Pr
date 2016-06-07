@@ -9,11 +9,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-/**
- *
- * @author p3
- */
-
 
 public class GreetinServer implements Runnable
 {
@@ -40,6 +35,8 @@ public class GreetinServer implements Runnable
            return null;
        }
    }
+   
+   
  
    @Override
    public void run()
@@ -49,13 +46,15 @@ public class GreetinServer implements Runnable
           System.out.println("Waiting for client on port " +   SERVER_SOCKET.getLocalPort() + "...");
           try (Socket server = SERVER_SOCKET.accept()) {
               System.out.println("Just connected to: "+ server.getRemoteSocketAddress());
+           
               DataInputStream in = new DataInputStream(server.getInputStream());
-              String readFromBuffer= in.readUTF();
-              ArrayList<String> dataParsed=getParsedDataFromBuffer(readFromBuffer);
-              DBMS_interface dbms_if=new DBMS_interface();
-            
               DataOutputStream out = new DataOutputStream(server.getOutputStream());
               
+              String readFromBuffer= in.readUTF();
+              ArrayList<String> dataParsed=getParsedDataFromBuffer(readFromBuffer);
+              
+              DBMS_interface dbms_if=new DBMS_interface();
+                
               switch(dataParsed.get(0)){
                   case FormatMessage.LOGIN:
                       HandleUser.checkLogin(dbms_if, dataParsed, out);
@@ -77,15 +76,11 @@ public class GreetinServer implements Runnable
                       HandleAd.handleAD(server, dbms_if, dataParsed, out);
                       break;
               }
-              
-              
-              
+  
           } catch (Exception ex) {
              ex.printStackTrace();
-          }
-         
+          } 
       }
    }
 
 }
-
