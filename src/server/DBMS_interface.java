@@ -160,10 +160,10 @@ public class DBMS_interface {
     }
         } catch (SQLException ex) {
             Logger.getLogger(DBMS_interface.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
         System.out.println(arrayList.toString());
         return arrayList;
-
     }
 
     

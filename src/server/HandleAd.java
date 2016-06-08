@@ -17,6 +17,7 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -101,15 +102,26 @@ public class HandleAd {
    }
    
    
+   static ArrayList<String> getKeywordsList(String keyword){
+   ArrayList<String> keywordsList=new ArrayList<>();
+   if (keyword != null) {
+            String[] myData = keyword.split(" ");
+            keywordsList.addAll(Arrays.asList(myData));
+        }
+   return keywordsList;
+   }
+   
    
    public static void seeNearAds(String uname,
-           String typology, String latString, String longitString,
-           String distString, DBMS_interface dbIf) throws SQLException{
-       double lat=Double.valueOf(latString);
-       double lon=Double.valueOf(longitString);
-       int dist=Integer.valueOf(distString);
-        double distKm=dist/1000;
-        
+      String typology, String keywords, String latString, String longitString,
+      String distString, DBMS_interface dbIf,  DataOutputStream out) throws SQLException, IOException{
+       
+      double lat=Double.valueOf(latString);
+      double lon=Double.valueOf(longitString);
+      int dist=Integer.valueOf(distString);
+      double distKm=dist/1000;
+      ArrayList<String> keywordList=getKeywordsList(keywords); 
+      
       GPSCoordinates gpsCoordinates=new GPSCoordinates(lat, lon);
       gpsCoordinates.setDistance(distKm);
       double minLat=gpsCoordinates.getLatMin();
@@ -117,10 +129,11 @@ public class HandleAd {
       double minLon=gpsCoordinates.getLonMin();
       double maxLon=gpsCoordinates.getLonMax();
       
-       System.out.println("MinLat MaxLat "+minLat+" - "+maxLat+" MinLon MaxLon "+minLon+" "+maxLon);
+      // System.out.println("MinLat MaxLat "+minLat+" - "+maxLat+" MinLon MaxLon "+minLon+" "+maxLon);
      
-       dbIf.seeNearAdsQuery(typology,minLat, maxLat, minLon, maxLon); 
-       //send the result to the clients
+      ArrayList<String> nearAds=dbIf.seeNearAdsQuery(typology,minLat, maxLat, minLon, maxLon); 
+     if(nearAds!=null)  out.writeUTF(nearAds.toString());
+     else out.writeUTF("Error");
        }
      
    
@@ -162,17 +175,19 @@ public class HandleAd {
                    double longitude=Double.valueOf(receivedFromTheClient.get(7));
                    String from=receivedFromTheClient.get(8);
                    String until=receivedFromTheClient.get(9);
-                
-                    FileInputStream fisImg=new FileInputStream(imageToDB);
-                    FileInputStream fisDesc=new FileInputStream(descriptionToDb);
+                   FileInputStream fisImg=null;
+                   
+                   if(imageToDB!=null){
+                    fisImg=new FileInputStream(imageToDB);
                     fisImg.read();
-               
+                   }
+                     FileInputStream fisDesc=new FileInputStream(descriptionToDb);
                   if(dbms_if.insertAd(typology, fisDesc, fisImg,  priceDouble,
                           from, until,
                           latitude,longitude))  out.writeUTF(FormatMessage.INSERT_AD_OK);  
                     else out.writeUTF(FormatMessage.INSERT_USER_NO);
                   
-                    fisImg.close();
+                     if(imageToDB!=null) fisImg.close();
                     fisDesc.close();
                     break;
                    
@@ -190,7 +205,9 @@ public class HandleAd {
                case "SEE_NEAR":
                    System.out.println("SEE_NEAR");
                    seeNearAds(receivedFromTheClient.get(2),receivedFromTheClient.get(3),
-                           receivedFromTheClient.get(4), receivedFromTheClient.get(5), receivedFromTheClient.get(6),dbms_if);
+                           receivedFromTheClient.get(4), receivedFromTheClient.get(5),
+                           receivedFromTheClient.get(6),receivedFromTheClient.get(7),
+                           dbms_if,  out);
                    break;
                    
                    
