@@ -73,7 +73,7 @@ public class GreetinServer implements Runnable
                       break;
                       
                   case FormatMessage.AD:
-                      HandleAd.handleAD(server, dbms_if, dataParsed, out);
+                      HandleAd.handleAD(server, dbms_if, dataParsed, in, out);
                       break;
               }
   

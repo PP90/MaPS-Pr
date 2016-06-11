@@ -17,6 +17,10 @@ public class Server {
      */
     public static void main(String[] args) throws IOException, SQLException {
  boolean startServer=true;
+ 
+ //GPSCoordinates gps=new GPSCoordinates(0.0, 0.0);
+ //System.out.println("The distance is: "+gps.computeDistance(0.0, 0.0525));
+ 
  if(startServer){
         Thread t=new Thread((Runnable) new GreetinServer());
            t.start();

@@ -5,6 +5,7 @@ import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingExcepti
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -64,6 +65,9 @@ public class HandleAd {
     return s.format(new Date());
    }
    
+   static String appendString(String toAppend){
+   return null;
+   }
    
    static void receiveImage(String imgStr, String username) throws Base64DecodingException, IOException{
        byte[] decodedImage=Base64.decode(imgStr);
@@ -111,7 +115,7 @@ public class HandleAd {
    return keywordsList;
    }
    
-   
+
    public static void seeNearAds(String uname,
       String typology, String keywords, String latString, String longitString,
       String distString, DBMS_interface dbIf,  DataOutputStream out) throws SQLException, IOException{
@@ -137,12 +141,13 @@ public class HandleAd {
        }
      
    
-     public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient,  DataOutputStream out) throws IOException, Base64DecodingException, SQLException{
+     public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient,  DataInputStream in,DataOutputStream out) throws IOException, Base64DecodingException, SQLException{
                          ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
            ObjectOutputStream outObject=null;
            //DELETE AD. MANDATOTY
            //MODIFY AD. optional
              System.out.println("HandleAD");
+             
            switch(receivedFromTheClient.get(1)){
                case FormatMessage.USER_AD://SEE MY AD case. TODO: IMPLEMENT THE QUERY CASE INTO DB
                     try {
@@ -201,7 +206,7 @@ public class HandleAd {
                    System.out.println("IMG");
                    receiveImage(receivedFromTheClient.get(3),receivedFromTheClient.get(2));  
                    break;
-                   
+                
                case "SEE_NEAR":
                    System.out.println("SEE_NEAR");
                    seeNearAds(receivedFromTheClient.get(2),receivedFromTheClient.get(3),

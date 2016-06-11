@@ -76,4 +76,30 @@ public class GPSCoordinates {
         System.out.println("MinLat is:"+ getLatMin());
         System.out.println("MaxLat is:"+ getLatMax());
     }
+    
+    public int computeDistance(double lat2, double lon2){
+    if(lat2==this.lat && lon2==this.lon) return 0;
+    
+    double lat2Rad=this.getRadians(lat2);
+    double lon2Rad=this.getRadians(lon2);
+    
+    double deltaLatDistance=lat-lat2Rad;
+    double deltaLonDistance=lon-lon2Rad;
+    
+    double a=(Math.sin(deltaLatDistance/2)*Math.sin(deltaLatDistance/2)+
+            Math.cos(this.lat)* Math.cos(lat2Rad)*
+            Math.sin(deltaLonDistance/2)*Math.sin(deltaLonDistance/2));
+    
+    double c=2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    double d=EARTH_RADIUS_KM*c;
+    System.out.println("The distance between ");
+    this.toStringInfo();
+     System.out.println("and ");
+     System.out.println("lat: " +lat2Rad);
+      System.out.println("lon: " +lon2Rad);
+      
+      //The distance is expressed in km.
+    //Multiplied by 1000 is expressed in meters
+    return (int)(d*1000);
+    }
 }
