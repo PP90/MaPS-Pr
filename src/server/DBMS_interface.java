@@ -46,17 +46,17 @@ public class DBMS_interface {
         }
     }
     
-    public ArrayList<String> seeNearAdsQuery(String typology, double minLat, double maxLat, double minLon, double maxLon){
+    public ArrayList<String> seeNearAdsQuery(String typology, ArrayList<String> keywords,  GPSCoordinates gpsCoordinates){
         String query="SELECT * FROM Ad WHERE Typology=? AND Latitude BETWEEN ? AND ? AND Longitude BETWEEN ? AND ?";
         try {
             PreparedStatement ps= connection.prepareStatement(query);
             ps.setString(1, typology);
-            ps.setDouble(2, minLat);
-            ps.setDouble(3, maxLat);
-            ps.setDouble(4, minLon);
-            ps.setDouble(5, maxLon);
+            ps.setDouble(2, gpsCoordinates.getLatMin());
+            ps.setDouble(3, gpsCoordinates.getLatMax());
+            ps.setDouble(4, gpsCoordinates.getLonMin());
+            ps.setDouble(5, gpsCoordinates.getLonMax());
             ResultSet rs=ps.executeQuery();
-            return this.getNearAdsArrayList(rs);
+            return this.getNearAdsArrayList(rs,gpsCoordinates);
             
         } catch (SQLException ex) {
           ex.printStackTrace();
@@ -134,14 +134,14 @@ public class DBMS_interface {
         return usersList;
     }
     
-    private ArrayList<String> getNearAdsArrayList(ResultSet rs){
+    private ArrayList<String> getNearAdsArrayList(ResultSet rs, GPSCoordinates gpsCoordinates){
          ArrayList<String> arrayList = null;
         try {
-            ResultSetMetaData md = rs.getMetaData();
               arrayList=new ArrayList<>();
               int coutner=0;
                 while (rs.next()) {
                     coutner++;
+                    
                    int id=(int) rs.getObject(1);
                    String typology= (String) rs.getObject(2);
                    String description= (String)rs.getObject(3);
@@ -149,13 +149,12 @@ public class DBMS_interface {
                    double price= (double) rs.getObject(5);
                    Timestamp from= (Timestamp) rs.getObject(6);
                    Timestamp until = (Timestamp)rs.getObject(7);
-                   double lat= (double) rs.getObject(8);
-                   double lon= (double) rs.getObject(9);
-         arrayList.add(String.valueOf(id)+","+typology+","+description+","+
+                   int distance =gpsCoordinates.computeDistance((double) rs.getObject(8), (double) rs.getObject(9));
+                   
+                arrayList.add(String.valueOf(id)+","+typology+","+description+","+
                 Base64.encode(photo)+","+String.valueOf(price)+","+
                  from.toString()+","+until.toString()+","+
-                 String.valueOf(lat)+","+String.valueOf(lon)+";") ; 
-         System.out.println("There are "+coutner+" elements");
+                 distance+";") ; 
          
     }
         } catch (SQLException ex) {

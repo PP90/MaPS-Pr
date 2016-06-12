@@ -128,14 +128,7 @@ public class HandleAd {
       
       GPSCoordinates gpsCoordinates=new GPSCoordinates(lat, lon);
       gpsCoordinates.setDistance(distKm);
-      double minLat=gpsCoordinates.getLatMin();
-      double maxLat=gpsCoordinates.getLatMax();
-      double minLon=gpsCoordinates.getLonMin();
-      double maxLon=gpsCoordinates.getLonMax();
-      
-      // System.out.println("MinLat MaxLat "+minLat+" - "+maxLat+" MinLon MaxLon "+minLon+" "+maxLon);
-     
-      ArrayList<String> nearAds=dbIf.seeNearAdsQuery(typology,minLat, maxLat, minLon, maxLon); 
+      ArrayList<String> nearAds=dbIf.seeNearAdsQuery(typology,null,gpsCoordinates); 
      if(nearAds!=null)  out.writeUTF(nearAds.toString());
      else out.writeUTF("Error");
        }
