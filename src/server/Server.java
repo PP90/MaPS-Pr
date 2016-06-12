@@ -19,22 +19,17 @@ public class Server {
     public static void main(String[] args) throws IOException, SQLException {
  boolean startServer=true;
  
-
+ test();
  if(startServer){
         Thread t=new Thread((Runnable) new GreetinServer());
            t.start();
  }
     }
-    public void test(){
+    static void test(){
         GPSCoordinates gps=new GPSCoordinates(42.90, 10.99);
         gps.setDistance(1);
-        ArrayList<String> keywords=new ArrayList<>();
-        keywords.add("vino");
-        keywords.add("scadente");
-        keywords.add("economico");
  DBMS_interface dbif=new DBMS_interface();
- ArrayList<String> adList=dbif.seeNearAdsQuery("buy", null, gps);
-System.out.println("Element n0 is "+adList.get(0));
+ ArrayList<String> adList=dbif.seeNearAdsQuery("buy", HandleAd.getKeyword("vino scadente"), gps);
     
     }
 }

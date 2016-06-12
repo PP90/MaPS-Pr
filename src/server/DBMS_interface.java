@@ -47,7 +47,18 @@ public class DBMS_interface {
     }
     
     public ArrayList<String> seeNearAdsQuery(String typology, ArrayList<String> keywords,  GPSCoordinates gpsCoordinates){
+       
         String query="SELECT * FROM Ad WHERE Typology=? AND Latitude BETWEEN ? AND ? AND Longitude BETWEEN ? AND ?";
+        
+         String regularExpression="AND Description REGEXP '";
+        if(keywords!=null){
+            for(int i=0; i<keywords.size()-1; i++) regularExpression+=keywords.get(i)+"+|";
+            regularExpression+=keywords.get(keywords.size()-1)+"+'";
+            query+=regularExpression;
+        }
+        
+        System.out.println("query: "+query);
+       
         try {
             PreparedStatement ps= connection.prepareStatement(query);
             ps.setString(1, typology);

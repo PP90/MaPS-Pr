@@ -91,15 +91,14 @@ public class GPSCoordinates {
             Math.sin(deltaLonDistance/2)*Math.sin(deltaLonDistance/2));
     
     double c=2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    double d=EARTH_RADIUS_KM*c;
-    System.out.println("The distance between ");
+ /*   System.out.println("The distance between ");
     this.toStringInfo();
      System.out.println("and ");
      System.out.println("lat: " +lat2Rad);
       System.out.println("lon: " +lon2Rad);
-      
+      */
       //The distance is expressed in km.
     //Multiplied by 1000 is expressed in meters
-    return (int)(d*1000);
+    return (int)(EARTH_RADIUS_KM*c*1000);
     }
 }

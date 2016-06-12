@@ -60,6 +60,20 @@ public class HandleAd {
    }
    
     
+   static ArrayList<String> getKeyword(String keywordList){
+        ArrayList<String> keywordsArrayList=new ArrayList<>();
+       if(keywordList!=null){
+           
+            String[] myData=keywordList.split(" ");
+            keywordsArrayList.addAll(Arrays.asList(myData));
+            return keywordsArrayList;
+            
+       }else{
+           return null;
+       }
+   
+   }
+   
    static String getCurrentTs(){
     SimpleDateFormat s = new SimpleDateFormat(DATE_FORMAT);
     return s.format(new Date());
