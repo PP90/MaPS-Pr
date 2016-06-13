@@ -29,8 +29,6 @@ public class HandleAd {
     static InputStream input=null;
     static File imageToDB=null;
     static File descriptionToDb=null;
-    static final String PATH_FILE="C:\\ProximityMarket\\";
-    static final String DATE_FORMAT="yyyymmdd";
     
 
    
@@ -49,10 +47,7 @@ public class HandleAd {
    
    }
    
-   static String getCurrentTs(){
-    SimpleDateFormat s = new SimpleDateFormat(DATE_FORMAT);
-    return s.format(new Date());
-   }
+ 
    
    static String appendString(String toAppend){
    return null;
