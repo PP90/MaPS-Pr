@@ -17,13 +17,12 @@ public class Server {
      * @throws java.sql.SQLException
      */
     public static void main(String[] args) throws IOException, SQLException {
- boolean startServer=true;
  
- test();
- if(startServer){
+ //test();
+
         Thread t=new Thread((Runnable) new GreetinServer());
            t.start();
- }
+ 
     }
     static void test(){
         GPSCoordinates gps=new GPSCoordinates(42.90, 10.99);
