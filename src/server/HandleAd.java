@@ -1,16 +1,12 @@
 package server;
 
 import EntityClasses.FormatMessage;
-import com.sun.org.apache.xml.internal.security.exceptions.Base64DecodingException;
-import com.sun.org.apache.xml.internal.security.utils.Base64;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
@@ -36,28 +32,7 @@ public class HandleAd {
     static final String PATH_FILE="C:\\ProximityMarket\\";
     static final String DATE_FORMAT="yyyymmdd";
     
-    //THIS FUNCTION MAY BE IS NOT USEFUL BECAUSE THE IMAGE IS SENT IN BASE 64 FORMAT
-    static boolean sendImage(ObjectOutputStream outObject){
-       try {
-            
-            FileInputStream fis=new FileInputStream("C:\\sample\\sample.jpg");
-           
-            int fisSize=fis.available();
-            byte[] buffer=new byte[fisSize];
-            fis.read(buffer);
-            outObject.writeObject(buffer);
-            return true;
-        } 
-       catch (FileNotFoundException ex) {
-            System.out.println("Error in retriving file");
-            Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-       }
-       catch (IOException ex) {
-           Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
-           return false;
-       }
-   }
+
    
     
    static ArrayList<String> getKeyword(String keywordList){
@@ -82,29 +57,8 @@ public class HandleAd {
    static String appendString(String toAppend){
    return null;
    }
-   
-   static void receiveImage(String imgStr, String username) throws Base64DecodingException, IOException{
-       byte[] decodedImage=Base64.decode(imgStr);
-       System.out.println("The decoded size is "+decodedImage.length);
-       String filename=PATH_FILE+"JPEG_"+username+"_"+getCurrentTs()+".jpg";
-       if(writeImageOnFile(decodedImage, filename)) System.out.println("Image written correctly");
-       else System.out.println("Error during writing image");
-   }
-   
-   //may is not useful because the database can contains a filed with 400 chars
-   static boolean writeDescriptionOnFile(String description, String username) throws FileNotFoundException{
-         try {
-             String filename=PATH_FILE+"DESC_"+username+"_"+getCurrentTs()+".txt";
-             descriptionToDb=new File(filename);
-             FileOutputStream fos=new FileOutputStream(descriptionToDb);
-             fos.write(description.getBytes());
-             fos.close();
-             return true;
-         } catch (IOException ex) {
-             Logger.getLogger(HandleAd.class.getName()).log(Level.SEVERE, null, ex);
-             return false;
-         }
-   }
+  
+ 
    
    static boolean writeImageOnFile(byte[] byteToSaveOnFile, String filename){
    
@@ -148,7 +102,7 @@ public class HandleAd {
        }
      
    
-     public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient,  DataInputStream in,DataOutputStream out) throws IOException, Base64DecodingException, SQLException{
+     public static void  handleAD(Socket server, DBMS_interface dbms_if, ArrayList<String> receivedFromTheClient,  DataInputStream in,DataOutputStream out) throws IOException, SQLException{
                          ///IMPLEMENTES THE POSSIBLE SUBCASES OF AD:
            ObjectOutputStream outObject=null;
            //DELETE AD. MANDATOTY
@@ -161,7 +115,7 @@ public class HandleAd {
          
            System.out.println("The client wants its ads");
                  outObject = new ObjectOutputStream(server.getOutputStream());
-           sendImage(outObject);
+          
        } catch (IOException ex) {
            Logger.getLogger(GreetinServer.class.getName()).log(Level.SEVERE, null, ex);
        } finally {
@@ -175,7 +129,6 @@ public class HandleAd {
                         
                case FormatMessage.INSERT_AD:
                    String typology=receivedFromTheClient.get(3);
-                   writeDescriptionOnFile(receivedFromTheClient.get(4),receivedFromTheClient.get(2));
 
                    double priceDouble;
                    try{
@@ -209,10 +162,6 @@ public class HandleAd {
                    
                    break;
                    
-               case "IMG":
-                   System.out.println("IMG");
-                   receiveImage(receivedFromTheClient.get(3),receivedFromTheClient.get(2));  
-                   break;
                 
                case "SEE_NEAR":
                    System.out.println("SEE_NEAR");
