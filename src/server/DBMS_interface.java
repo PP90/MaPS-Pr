@@ -1,6 +1,5 @@
 package server;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -163,7 +162,7 @@ public class DBMS_interface {
                    int distance =gpsCoordinates.computeDistance((double) rs.getObject(8), (double) rs.getObject(9));
                    
                 arrayList.add(String.valueOf(id)+","+typology+","+description+","+
-                Base64.encode(photo)+","+String.valueOf(price)+","+
+                "URI IMG"+","+String.valueOf(price)+","+
                  from.toString()+","+until.toString()+","+
                  distance+";") ; 
          
