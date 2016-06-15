@@ -28,9 +28,7 @@ public class Server {
         GPSCoordinates gps=new GPSCoordinates(42.90, 10.99);
         gps.setDistance(1);
  DBMS_interface dbif=new DBMS_interface();
- ArrayList<String> adList=dbif.seeNearAdsQuery("buy", HandleAd.getKeyword("vino scadente"), gps);
+
     
     }
 }
-    
-    

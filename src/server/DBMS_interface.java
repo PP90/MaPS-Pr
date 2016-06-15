@@ -49,8 +49,12 @@ public class DBMS_interface {
        
         String query="SELECT * FROM Ad WHERE Typology=? AND Latitude BETWEEN ? AND ? AND Longitude BETWEEN ? AND ?";
         
-         String regularExpression="AND Description REGEXP '";
-        if(keywords!=null){
+         String regularExpression=" AND Description REGEXP '";
+         System.out.println("1st kw value: "+keywords.get(0));
+         if(keywords.get(0).isEmpty()){
+              System.out.println("It is empty");
+         }
+        if(!keywords.get(0).isEmpty()){
             for(int i=0; i<keywords.size()-1; i++) regularExpression+=keywords.get(i)+"+|";
             regularExpression+=keywords.get(keywords.size()-1)+"+'";
             query+=regularExpression;
@@ -91,8 +95,8 @@ public class DBMS_interface {
     }
     
     //It works
-    public boolean insertAd(String typology,FileInputStream fisDescription,
-            FileInputStream fisPhoto, double price, 
+    public boolean insertAd(String typology,String description,
+            String imgUrl, double price, 
             String validFrom, String validUntil,
             double latitude, double longitude){
         String insertAdQuery;
@@ -103,11 +107,8 @@ public class DBMS_interface {
         try {
             ps = connection.prepareStatement(insertAdQuery);
             ps.setString(1, typology);
-            if(fisDescription!=null)  ps.setBlob(2, fisDescription);
-            else ps.setNull(2, java.sql.Types.BLOB);
-         
-            if(fisPhoto!=null) ps.setBlob(3, fisPhoto);
-            else ps.setNull(3, java.sql.Types.BLOB);
+            ps.setString(2, description);
+            ps.setString(3, imgUrl);
             ps.setDouble(4, price);
             ps.setString(5, validFrom);
             ps.setString(6, validUntil);
@@ -155,16 +156,16 @@ public class DBMS_interface {
                    int id=(int) rs.getObject(1);
                    String typology= (String) rs.getObject(2);
                    String description= (String)rs.getObject(3);
-                   byte[] photo= (byte[]) rs.getObject(4);
+                   String imgUrl= (String) rs.getObject(4);
                    double price= (double) rs.getObject(5);
                    Timestamp from= (Timestamp) rs.getObject(6);
                    Timestamp until = (Timestamp)rs.getObject(7);
                    int distance =gpsCoordinates.computeDistance((double) rs.getObject(8), (double) rs.getObject(9));
                    
                 arrayList.add(String.valueOf(id)+","+typology+","+description+","+
-                "URI IMG"+","+String.valueOf(price)+","+
+                imgUrl+","+String.valueOf(price)+","+
                  from.toString()+","+until.toString()+","+
-                 distance+";") ; 
+                 distance) ; 
          
     }
         } catch (SQLException ex) {
