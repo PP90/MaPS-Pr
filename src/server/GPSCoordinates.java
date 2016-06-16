@@ -6,7 +6,7 @@ public class GPSCoordinates {
     private final int EARTH_RADIUS_KM=6371;
     private double rSmall;
     private double deltaLon;
-     private double deltaLat;
+    private double deltaLat;
     
     public GPSCoordinates(double lat, double lon){
     this.lat=getRadians(lat);
@@ -78,7 +78,7 @@ public class GPSCoordinates {
     }
     
     public int computeDistance(double lat2, double lon2){
-    if(lat2==this.lat && lon2==this.lon) return 0;
+   // if(lat2==this.lat && lon2==this.lon) return 0;
     
     double lat2Rad=this.getRadians(lat2);
     double lon2Rad=this.getRadians(lon2);
@@ -91,12 +91,12 @@ public class GPSCoordinates {
             Math.sin(deltaLonDistance/2)*Math.sin(deltaLonDistance/2));
     
     double c=2*Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
- /*   System.out.println("The distance between ");
+    System.out.println("The distance between ");
     this.toStringInfo();
      System.out.println("and ");
      System.out.println("lat: " +lat2Rad);
       System.out.println("lon: " +lon2Rad);
-      */
+      
       //The distance is expressed in km.
     //Multiplied by 1000 is expressed in meters
     return (int)(EARTH_RADIUS_KM*c*1000);

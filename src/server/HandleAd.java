@@ -1,14 +1,9 @@
 package server;
 
 import EntityClasses.FormatMessage;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
@@ -70,10 +65,13 @@ public class HandleAd {
        
       double lat=Double.valueOf(latString);
       double lon=Double.valueOf(longitString);
-      int dist=Integer.valueOf(distString);
+      double dist=(double)Integer.valueOf(distString);
       double distKm=dist/1000;
+      
+     System.out.println("Dist in km is: "+distKm);
      GPSCoordinates gpsCoordinates=new GPSCoordinates(lat, lon);
      gpsCoordinates.setDistance(distKm);
+     
      ArrayList<String> nearAds=dbIf.seeNearAdsQuery(typology, HandleAd.getKeyword(keywords), gpsCoordinates); 
      if(nearAds!=null)  out.writeUTF(nearAds.toString());
      else out.writeUTF("Error");
@@ -93,6 +91,7 @@ public class HandleAd {
                    break;
                         
                case FormatMessage.INSERT_AD:
+                   String publishier=receivedFromTheClient.get(2);
                    String typology=receivedFromTheClient.get(3);
                    String description=receivedFromTheClient.get(4);
                    String imgUrl=receivedFromTheClient.get(5); 
@@ -108,7 +107,7 @@ public class HandleAd {
                    String until=receivedFromTheClient.get(10);
 
 
-                  if(dbms_if.insertAd(typology, description, imgUrl,  priceDouble,
+                  if(dbms_if.insertAd(publishier, typology, description, imgUrl,  priceDouble,
                           from, until,
                           latitude,longitude))  out.writeUTF(FormatMessage.INSERT_AD_OK);  
                     else out.writeUTF(FormatMessage.INSERT_USER_NO);

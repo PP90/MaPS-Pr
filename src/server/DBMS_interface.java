@@ -1,6 +1,5 @@
 package server;
 
-import java.io.FileInputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -95,25 +94,26 @@ public class DBMS_interface {
     }
     
     //It works
-    public boolean insertAd(String typology,String description,
+    public boolean insertAd(String publisher, String typology,String description,
             String imgUrl, double price, 
             String validFrom, String validUntil,
             double latitude, double longitude){
         String insertAdQuery;
        
-        insertAdQuery = "INSERT INTO ad (`Typology`, `Description`, `Photo`,`Price`, `ValidFrom`, `ValidUntil`, `Latitude`, `Longitude`)"
-                + " values (?, ?, ? ,?, ?, ?, ?, ?)";
+        insertAdQuery = "INSERT INTO ad (`Publisher`, `Typology`, `Description`, `Photo`,`Price`, `ValidFrom`, `ValidUntil`, `Latitude`, `Longitude`)"
+                + " values (?, ?, ?, ? ,?, ?, ?, ?, ?)";
          PreparedStatement ps;
         try {
             ps = connection.prepareStatement(insertAdQuery);
-            ps.setString(1, typology);
-            ps.setString(2, description);
-            ps.setString(3, imgUrl);
-            ps.setDouble(4, price);
-            ps.setString(5, validFrom);
-            ps.setString(6, validUntil);
-            ps.setDouble(7, latitude);
-            ps.setDouble(8, longitude);
+            ps.setString(1, publisher);
+            ps.setString(2, typology);
+            ps.setString(3, description);
+            ps.setString(4, imgUrl);
+            ps.setDouble(5, price);
+            ps.setString(6, validFrom);
+            ps.setString(7, validUntil);
+            ps.setDouble(8, latitude);
+            ps.setDouble(9, longitude);
             ps.executeUpdate();
             
             return true;
@@ -154,15 +154,18 @@ public class DBMS_interface {
                     coutner++;
                     
                    int id=(int) rs.getObject(1);
-                   String typology= (String) rs.getObject(2);
-                   String description= (String)rs.getObject(3);
-                   String imgUrl= (String) rs.getObject(4);
-                   double price= (double) rs.getObject(5);
-                   Timestamp from= (Timestamp) rs.getObject(6);
-                   Timestamp until = (Timestamp)rs.getObject(7);
-                   int distance =gpsCoordinates.computeDistance((double) rs.getObject(8), (double) rs.getObject(9));
+                   String publisher= (String) rs.getObject(2);
+                   String typology= (String) rs.getObject(3);
+                   String description= (String)rs.getObject(4);
+                   String imgUrl= (String) rs.getObject(5);
+                   double price= (double) rs.getObject(6);
+                   Timestamp from= (Timestamp) rs.getObject(7);
+                   Timestamp until = (Timestamp)rs.getObject(8);
+                   int distance =gpsCoordinates.computeDistance((double) rs.getObject(9), (double) rs.getObject(10));
+                   System.out.println("Distance: "+distance);
                    
-                arrayList.add(String.valueOf(id)+","+typology+","+description+","+
+                arrayList.add(String.valueOf(id)+","+publisher+","
+                        +typology+","+description+","+
                 imgUrl+","+String.valueOf(price)+","+
                  from.toString()+","+until.toString()+","+
                  distance) ; 
